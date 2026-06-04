@@ -13,59 +13,56 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0f0f10;
-      --surface: #18181b;
-      --surface2: #1f1f23;
-      --border: #2a2a30;
-      --accent: #6ee7b7;
-      --accent-dim: #2d6e58;
-      --accent-glow: rgba(110, 231, 183, 0.12);
-      --text: #f0f0f2;
-      --text-muted: #6b6b75;
-      --text-dim: #9999a8;
-      --danger: #f87171;
-      --warn: #fbbf24;
-      --radius: 16px;
-      --radius-sm: 10px;
+      --bg: #0f0f10; --surface: #18181b; --surface2: #1f1f23; --border: #2a2a30;
+      --accent: #6ee7b7; --accent-dim: #2d6e58; --accent-glow: rgba(110,231,183,0.12);
+      --text: #f0f0f2; --text-muted: #6b6b75; --text-dim: #9999a8;
+      --danger: #f87171; --warn: #fbbf24; --radius: 16px; --radius-sm: 10px;
     }
-
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow: hidden; }
-
     #app { display: flex; flex-direction: column; height: 100dvh; max-width: 480px; margin: 0 auto; position: relative; }
 
-    header { padding: 56px 24px 16px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0; }
-
+    /* Header */
+    header { padding: 52px 24px 14px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0; }
     .wordmark { font-size: 32px; font-weight: 800; letter-spacing: -1px; color: var(--text); line-height: 1; }
     .wordmark span { color: var(--accent); }
-    .header-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); text-align: right; line-height: 1.6; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .header-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); text-align: right; }
+    .filter-toggle-btn { background: transparent; border: 1px solid var(--border); border-radius: 100px; padding: 5px 12px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.15s ease; letter-spacing: 0.05em; }
+    .filter-toggle-btn.active { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+    .filter-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: none; }
+    .filter-toggle-btn.filtered .filter-dot { display: block; }
+
+    /* Filter drawer */
+    .filter-drawer { overflow: hidden; max-height: 0; transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease; opacity: 0; flex-shrink: 0; }
+    .filter-drawer.open { max-height: 120px; opacity: 1; }
+    .filter-drawer-inner { padding: 8px 24px 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag-filter-btn { font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 12px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+    .tag-filter-btn.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
 
     /* Tabs */
-    .tabs { display: flex; gap: 8px; padding: 0 24px 12px; flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .tabs::-webkit-scrollbar { display: none; }
-    .tab { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+    .tabs { display: flex; gap: 8px; padding: 0 24px 14px; flex-shrink: 0; }
+    .tab { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
     .tab.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
 
-    /* Tag filter row */
-    .tag-filters { display: flex; gap: 6px; padding: 0 24px 14px; flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .tag-filters::-webkit-scrollbar { display: none; }
-    .tag-filter-btn { font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; white-space: nowrap; flex-shrink: 0; }
-    .tag-filter-btn.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
+    /* Notif bar */
+    .notif-bar { margin: 0 24px 10px; padding: 9px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.07); font-family: 'DM Mono', monospace; font-size: 11px; color: var(--warn); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
+    .notif-bar.hidden { display: none; }
+    .notif-bar-enable { background: none; border: none; color: var(--warn); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: underline; white-space: nowrap; }
 
     /* List */
     .list-wrap { flex: 1; overflow-y: auto; padding: 0 24px 100px; -webkit-overflow-scrolling: touch; }
     .list-wrap::-webkit-scrollbar { display: none; }
-
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; color: var(--text-muted); }
     .empty-icon { font-size: 40px; opacity: 0.4; }
     .empty-label { font-family: 'DM Mono', monospace; font-size: 13px; opacity: 0.5; }
 
-    /* Card */
+    /* Cards */
     .reminder-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; transition: border-color 0.15s ease, opacity 0.2s ease; position: relative; overflow: hidden; }
     .reminder-card.overdue { border-color: rgba(248,113,113,0.3); }
     .reminder-card.overdue::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--danger); border-radius: 3px 0 0 3px; }
     .reminder-card.done { opacity: 0.4; }
+    .reminder-card.is-child { margin-left: 20px; border-left: 2px solid var(--accent-dim); border-radius: 0 var(--radius) var(--radius) 0; }
 
     .check-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 12px; }
     .check-btn:hover { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
@@ -74,14 +71,16 @@
     .card-body { flex: 1; min-width: 0; }
     .card-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 5px; }
     .reminder-card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
-
-    .card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+    .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
     .card-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
     .card-time.overdue-label { color: var(--danger); }
-
     .card-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
-
     .followup-badge { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--warn); }
+
+    /* Stack indicator */
+    .stack-indicator { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); background: var(--accent-glow); border: 1px solid var(--accent-dim); padding: 2px 8px; border-radius: 100px; cursor: pointer; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 4px; }
+    .stack-indicator:hover { background: rgba(110,231,183,0.2); }
+    .stack-children { margin-top: 6px; }
 
     .card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
     .action-btn { font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
@@ -89,32 +88,32 @@
     .action-btn.danger:hover { border-color: rgba(248,113,113,0.4); color: var(--danger); background: rgba(248,113,113,0.08); }
 
     /* FAB */
-    .fab { position: absolute; bottom: 32px; right: 24px; width: 58px; height: 58px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #0f0f10; box-shadow: 0 0 0 0 rgba(110,231,183,0.4); transition: transform 0.15s ease, box-shadow 0.15s ease; z-index: 10; }
+    .fab { position: absolute; bottom: 32px; right: 24px; width: 58px; height: 58px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #0f0f10; transition: transform 0.15s ease, box-shadow 0.15s ease; z-index: 10; }
     .fab:hover { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(110,231,183,0.15); }
     .fab:active { transform: scale(0.95); }
 
-    /* Overlay / Sheet */
+    /* Overlays */
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: flex-end; backdrop-filter: blur(4px); }
     .overlay.open { display: flex; }
-    .sheet { background: var(--surface); border-radius: 24px 24px 0 0; border-top: 1px solid var(--border); width: 100%; max-width: 480px; margin: 0 auto; padding: 12px 24px 48px; animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1); max-height: 90dvh; overflow-y: auto; }
+    .sheet { background: var(--surface); border-radius: 24px 24px 0 0; border-top: 1px solid var(--border); width: 100%; max-width: 480px; margin: 0 auto; padding: 12px 24px 48px; animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1); max-height: 92dvh; overflow-y: auto; }
     .sheet::-webkit-scrollbar { display: none; }
     @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
     .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
     .sheet-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
-
     .field-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px; }
     .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 15px; outline: none; margin-bottom: 16px; transition: border-color 0.15s ease; -webkit-appearance: none; }
     .field-input:focus { border-color: var(--accent-dim); }
     .field-input::placeholder { color: var(--text-muted); }
     input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+    select.field-input { cursor: pointer; }
+    select.field-input option { background: #1f1f23; }
 
     /* Tag picker */
     .tag-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
     .tag-pick-btn { font-family: 'DM Mono', monospace; font-size: 11px; padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
     .tag-pick-btn.selected { border-color: var(--accent-dim); background: var(--accent-glow); color: var(--accent); }
 
-    /* Follow-up toggle */
+    /* Toggle */
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 16px; cursor: pointer; }
     .toggle-label { font-size: 14px; font-weight: 600; color: var(--text); }
     .toggle-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
@@ -141,18 +140,26 @@
     .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; padding: 10px 20px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-dim); opacity: 0; transition: all 0.25s ease; white-space: nowrap; z-index: 100; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Notif bar */
-    .notif-bar { margin: 0 24px 12px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.07); font-family: 'DM Mono', monospace; font-size: 11px; color: var(--warn); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
-    .notif-bar.hidden { display: none; }
-    .notif-bar-enable { background: none; border: none; color: var(--warn); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: underline; white-space: nowrap; }
+    /* Section label */
+    .section-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 14px 0 8px; opacity: 0.6; }
   </style>
 </head>
 <body>
 <div id="app">
   <header>
     <div class="wordmark">Pi<span>ng</span></div>
-    <div class="header-meta" id="header-meta">0 pending</div>
+    <div class="header-right">
+      <div class="header-meta" id="header-meta">0 pending</div>
+      <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleFilterDrawer()">
+        <div class="filter-dot"></div>
+        Filter
+      </button>
+    </div>
   </header>
+
+  <div class="filter-drawer" id="filter-drawer">
+    <div class="filter-drawer-inner" id="filter-drawer-inner"></div>
+  </div>
 
   <div class="notif-bar hidden" id="notif-bar">
     <span>Enable notifications to get pinged</span>
@@ -165,8 +172,6 @@
     <button class="tab" onclick="setFilter('all', this)">All</button>
     <button class="tab" onclick="setFilter('done', this)">Done</button>
   </div>
-
-  <div class="tag-filters" id="tag-filters"></div>
 
   <div class="list-wrap" id="list-wrap">
     <div class="empty-state" id="empty-state">
@@ -189,6 +194,10 @@
     <input class="field-input" id="add-time" type="datetime-local" />
     <div class="field-label">Tag</div>
     <div class="tag-picker" id="add-tag-picker"></div>
+    <div class="field-label">Link to another reminder (optional)</div>
+    <select class="field-input" id="add-parent-select">
+      <option value="">None — standalone reminder</option>
+    </select>
     <div class="toggle-row" id="followup-toggle" onclick="toggleFollowUp()">
       <div>
         <div class="toggle-label">Follow-up needed</div>
@@ -217,41 +226,37 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── Tags ──
   const TAGS = [
-    { id: 'inc',        label: 'INC',         emoji: '🔴', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.35)', color: '#f87171' },
-    { id: 'homedepot',  label: 'Home Depot',  emoji: '🟠', bg: 'rgba(251,146,60,0.12)',  border: 'rgba(251,146,60,0.35)',  color: '#fb923c' },
-    { id: 'personal',   label: 'Personal',    emoji: '🔵', bg: 'rgba(96,165,250,0.12)',  border: 'rgba(96,165,250,0.35)',  color: '#60a5fa' },
-    { id: 'fitness',    label: 'Fitness',     emoji: '🟢', bg: 'rgba(74,222,128,0.12)',  border: 'rgba(74,222,128,0.35)',  color: '#4ade80' },
-    { id: 'health',     label: 'Health',      emoji: '🩵', bg: 'rgba(34,211,238,0.12)',  border: 'rgba(34,211,238,0.35)',  color: '#22d3ee' },
-    { id: 'pickleball', label: 'Pickleball',  emoji: '🥒', bg: 'rgba(163,230,53,0.12)',  border: 'rgba(163,230,53,0.35)',  color: '#a3e635' },
-    { id: 'later',      label: 'Later',       emoji: '🌫️', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.35)', color: '#94a3b8' },
+    { id: 'inc',        label: 'INC',        emoji: '🔴', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.35)', color: '#f87171' },
+    { id: 'homedepot',  label: 'Home Depot', emoji: '🟠', bg: 'rgba(251,146,60,0.12)',  border: 'rgba(251,146,60,0.35)',  color: '#fb923c' },
+    { id: 'personal',   label: 'Personal',   emoji: '🔵', bg: 'rgba(96,165,250,0.12)',  border: 'rgba(96,165,250,0.35)',  color: '#60a5fa' },
+    { id: 'fitness',    label: 'Fitness',    emoji: '🟢', bg: 'rgba(74,222,128,0.12)',  border: 'rgba(74,222,128,0.35)',  color: '#4ade80' },
+    { id: 'health',     label: 'Health',     emoji: '🩵', bg: 'rgba(34,211,238,0.12)',  border: 'rgba(34,211,238,0.35)',  color: '#22d3ee' },
+    { id: 'pickleball', label: 'Pickleball', emoji: '🥒', bg: 'rgba(163,230,53,0.12)',  border: 'rgba(163,230,53,0.35)',  color: '#a3e635' },
+    { id: 'later',      label: 'Later',      emoji: '🌫️', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.35)', color: '#94a3b8' },
   ];
 
   function getTag(id) { return TAGS.find(t => t.id === id) || null; }
 
-  // ── Storage ──
   const STORAGE_KEY = 'ping_reminders';
   function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
   function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
-  // ── State ──
   let reminders = load();
   let currentFilter = 'pending';
   let activeTagFilter = null;
+  let filterDrawerOpen = false;
   let snoozeTargetId = null;
   let editingId = null;
   let addFollowUp = false;
   let selectedTag = null;
 
-  // ── Helpers ──
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
   function formatTime(iso) {
     if (!iso) return 'No time set';
-    const d = new Date(iso);
-    const now = new Date();
-    const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+    const d = new Date(iso), now = new Date();
+    const tomorrow = new Date(now); tomorrow.setDate(now.getDate()+1);
     const timeStr = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     if (d.toDateString() === now.toDateString()) return `Today ${timeStr}`;
     if (d.toDateString() === tomorrow.toDateString()) return `Tomorrow ${timeStr}`;
@@ -276,33 +281,48 @@
 
   function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  // ── Tag filter row ──
-  function renderTagFilters() {
-    const container = document.getElementById('tag-filters');
-    container.innerHTML = '';
+  // ── Filter drawer ──
+  function toggleFilterDrawer() {
+    filterDrawerOpen = !filterDrawerOpen;
+    const drawer = document.getElementById('filter-drawer');
+    const btn = document.getElementById('filter-toggle-btn');
+    drawer.classList.toggle('open', filterDrawerOpen);
+    btn.classList.toggle('active', filterDrawerOpen);
+  }
+
+  function buildFilterDrawer() {
+    const inner = document.getElementById('filter-drawer-inner');
+    inner.innerHTML = '';
     const allBtn = document.createElement('button');
     allBtn.className = 'tag-filter-btn' + (activeTagFilter === null ? ' active' : '');
-    allBtn.textContent = 'All tags';
-    allBtn.onclick = () => { activeTagFilter = null; renderTagFilters(); render(); };
-    container.appendChild(allBtn);
+    allBtn.textContent = 'All';
+    allBtn.onclick = () => { activeTagFilter = null; buildFilterDrawer(); updateFilterBtn(); render(); };
+    inner.appendChild(allBtn);
     TAGS.forEach(t => {
       const btn = document.createElement('button');
       btn.className = 'tag-filter-btn' + (activeTagFilter === t.id ? ' active' : '');
       btn.textContent = t.emoji + ' ' + t.label;
-      btn.onclick = () => { activeTagFilter = activeTagFilter === t.id ? null : t.id; renderTagFilters(); render(); };
-      container.appendChild(btn);
+      btn.onclick = () => { activeTagFilter = activeTagFilter === t.id ? null : t.id; buildFilterDrawer(); updateFilterBtn(); render(); };
+      inner.appendChild(btn);
     });
   }
+
+  function updateFilterBtn() {
+    const btn = document.getElementById('filter-toggle-btn');
+    btn.classList.toggle('filtered', activeTagFilter !== null);
+  }
+
+  // ── Stacks: get children of a reminder ──
+  function getChildren(parentId) { return reminders.filter(r => r.parentId === parentId); }
+  function isChild(r) { return !!r.parentId; }
 
   // ── Render ──
   function render() {
     const wrap = document.getElementById('list-wrap');
     const empty = document.getElementById('empty-state');
-    const meta = document.getElementById('header-meta');
-    const count = pendingCount();
-    meta.textContent = count === 0 ? 'all clear' : `${count} pending`;
+    document.getElementById('header-meta').textContent = pendingCount() === 0 ? 'all clear' : `${pendingCount()} pending`;
 
-    let filtered = [...reminders].sort((a, b) => {
+    let filtered = [...reminders].sort((a,b) => {
       if (!a.time) return 1; if (!b.time) return -1;
       return new Date(a.time) - new Date(b.time);
     });
@@ -312,42 +332,70 @@
     if (currentFilter === 'followup') filtered = filtered.filter(r => r.followup && !r.done);
     if (activeTagFilter) filtered = filtered.filter(r => r.tag === activeTagFilter);
 
-    wrap.querySelectorAll('.reminder-card').forEach(el => el.remove());
-    empty.style.display = filtered.length === 0 ? 'flex' : 'none';
+    // In normal views, only show top-level (non-child) reminders — children render under parent
+    const topLevel = currentFilter === 'all' || currentFilter === 'done'
+      ? filtered.filter(r => !r.parentId)
+      : filtered.filter(r => !r.parentId);
 
-    filtered.forEach(r => {
-      const overdue = isOverdue(r);
-      const tag = r.tag ? getTag(r.tag) : null;
-      const card = document.createElement('div');
-      card.className = `reminder-card${overdue ? ' overdue' : ''}${r.done ? ' done' : ''}`;
-      card.dataset.id = r.id;
+    wrap.querySelectorAll('.reminder-card, .section-label, .stack-children').forEach(el => el.remove());
+    empty.style.display = topLevel.length === 0 ? 'flex' : 'none';
 
-      const tagHtml = tag ? `<span class="card-tag" style="background:${tag.bg};border:1px solid ${tag.border};color:${tag.color}">${tag.emoji} ${tag.label}</span>` : '';
-      const followupHtml = r.followup && !r.done ? `<span class="followup-badge">↩ follow-up</span>` : '';
-
-      card.innerHTML = `
-        <button class="check-btn" onclick="toggleDone('${r.id}')" aria-label="Complete">✓</button>
-        <div class="card-body">
-          <div class="card-title">${escHtml(r.title)}</div>
-          <div class="card-meta">
-            <span class="card-time ${overdue ? 'overdue-label' : ''}">${overdue ? '⚠ ' : ''}${formatTime(r.time)}</span>
-            ${tagHtml}${followupHtml}
-          </div>
-          ${!r.done ? `
-          <div class="card-actions">
-            <button class="action-btn" onclick="openSnooze('${r.id}')">Snooze</button>
-            <button class="action-btn" onclick="openEdit('${r.id}')">Edit</button>
-            <button class="action-btn danger" onclick="deleteReminder('${r.id}')">Remove</button>
-          </div>` : `
-          <div class="card-actions">
-            <button class="action-btn danger" onclick="deleteReminder('${r.id}')">Remove</button>
-          </div>`}
-        </div>`;
-      wrap.appendChild(card);
+    topLevel.forEach(r => {
+      wrap.appendChild(buildCard(r, false));
+      // Render children under parent
+      const children = getChildren(r.id).filter(c => {
+        if (currentFilter === 'done') return c.done;
+        if (currentFilter === 'pending' || currentFilter === 'followup') return !c.done;
+        return true;
+      });
+      if (children.length > 0) {
+        const childWrap = document.createElement('div');
+        childWrap.className = 'stack-children';
+        children.forEach(c => childWrap.appendChild(buildCard(c, true)));
+        wrap.appendChild(childWrap);
+      }
     });
 
     updateNotifBar();
     scheduleNotifications();
+  }
+
+  function buildCard(r, isChildCard) {
+    const overdue = isOverdue(r);
+    const tag = r.tag ? getTag(r.tag) : null;
+    const children = getChildren(r.id);
+    const card = document.createElement('div');
+    card.className = `reminder-card${overdue ? ' overdue' : ''}${r.done ? ' done' : ''}${isChildCard ? ' is-child' : ''}`;
+    card.dataset.id = r.id;
+
+    const tagHtml = tag ? `<span class="card-tag" style="background:${tag.bg};border:1px solid ${tag.border};color:${tag.color}">${tag.emoji} ${tag.label}</span>` : '';
+    const followupHtml = r.followup && !r.done ? `<span class="followup-badge">↩ follow-up</span>` : '';
+    const stackHtml = !isChildCard && children.length > 0
+      ? `<span class="stack-indicator" onclick="event.stopPropagation()">⛓ ${children.length} linked</span>` : '';
+
+    const parentR = r.parentId ? reminders.find(p => p.id === r.parentId) : null;
+    const parentHtml = parentR ? `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:4px">↑ ${escHtml(parentR.title)}</div>` : '';
+
+    card.innerHTML = `
+      <button class="check-btn" onclick="toggleDone('${r.id}')" aria-label="Complete">✓</button>
+      <div class="card-body">
+        ${parentHtml}
+        <div class="card-title">${escHtml(r.title)}</div>
+        <div class="card-meta">
+          <span class="card-time ${overdue ? 'overdue-label' : ''}">${overdue ? '⚠ ' : ''}${formatTime(r.time)}</span>
+          ${tagHtml}${followupHtml}${stackHtml}
+        </div>
+        ${!r.done ? `
+        <div class="card-actions">
+          <button class="action-btn" onclick="openSnooze('${r.id}')">Snooze</button>
+          <button class="action-btn" onclick="openEdit('${r.id}')">Edit</button>
+          <button class="action-btn danger" onclick="deleteReminder('${r.id}')">Remove</button>
+        </div>` : `
+        <div class="card-actions">
+          <button class="action-btn danger" onclick="deleteReminder('${r.id}')">Remove</button>
+        </div>`}
+      </div>`;
+    return card;
   }
 
   // ── Actions ──
@@ -360,6 +408,8 @@
   }
 
   function deleteReminder(id) {
+    // Also unlink any children
+    reminders.forEach(r => { if (r.parentId === id) r.parentId = null; });
     reminders = reminders.filter(r => r.id !== id);
     save(reminders); render(); toast('Removed');
   }
@@ -371,7 +421,7 @@
     render();
   }
 
-  // ── Tag picker builder ──
+  // ── Tag picker ──
   function buildTagPicker(selectedId) {
     const container = document.getElementById('add-tag-picker');
     container.innerHTML = '';
@@ -389,6 +439,21 @@
     });
   }
 
+  // ── Parent select ──
+  function buildParentSelect(excludeId, currentParentId) {
+    const sel = document.getElementById('add-parent-select');
+    sel.innerHTML = '<option value="">None — standalone reminder</option>';
+    reminders
+      .filter(r => r.id !== excludeId && !r.parentId && !r.done)
+      .forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = r.title.length > 50 ? r.title.slice(0,50) + '…' : r.title;
+        if (r.id === currentParentId) opt.selected = true;
+        sel.appendChild(opt);
+      });
+  }
+
   // ── Follow-up toggle ──
   function toggleFollowUp() {
     addFollowUp = !addFollowUp;
@@ -397,9 +462,7 @@
 
   // ── Add ──
   function openAdd() {
-    editingId = null;
-    addFollowUp = false;
-    selectedTag = null;
+    editingId = null; addFollowUp = false; selectedTag = null;
     document.getElementById('add-sheet-title').textContent = 'New reminder';
     document.getElementById('add-submit-btn').textContent = 'Add to Ping';
     document.getElementById('add-title').value = '';
@@ -407,6 +470,7 @@
     document.getElementById('add-time').value = toLocalISO(now);
     document.getElementById('followup-switch').classList.remove('on');
     buildTagPicker(null);
+    buildParentSelect(null, null);
     document.getElementById('add-overlay').classList.add('open');
     setTimeout(() => document.getElementById('add-title').focus(), 300);
   }
@@ -415,30 +479,30 @@
   function openEdit(id) {
     const r = reminders.find(r => r.id === id);
     if (!r) return;
-    editingId = id;
-    addFollowUp = r.followup || false;
-    selectedTag = r.tag || null;
+    editingId = id; addFollowUp = r.followup || false; selectedTag = r.tag || null;
     document.getElementById('add-sheet-title').textContent = 'Edit reminder';
     document.getElementById('add-submit-btn').textContent = 'Save changes';
     document.getElementById('add-title').value = r.title;
     document.getElementById('add-time').value = r.time ? toLocalISO(new Date(r.time)) : '';
     document.getElementById('followup-switch').classList.toggle('on', addFollowUp);
     buildTagPicker(selectedTag);
+    buildParentSelect(id, r.parentId || null);
     document.getElementById('add-overlay').classList.add('open');
     setTimeout(() => document.getElementById('add-title').focus(), 300);
   }
 
-  // ── Submit (add or edit) ──
+  // ── Submit ──
   function submitReminder() {
     const title = document.getElementById('add-title').value.trim();
     const time = document.getElementById('add-time').value;
+    const parentId = document.getElementById('add-parent-select').value || null;
     if (!title) { toast('Add a title first'); return; }
     if (editingId) {
       const r = reminders.find(r => r.id === editingId);
-      if (r) { r.title = title; r.time = time ? new Date(time).toISOString() : null; r.tag = selectedTag; r.followup = addFollowUp; }
+      if (r) { r.title = title; r.time = time ? new Date(time).toISOString() : null; r.tag = selectedTag; r.followup = addFollowUp; r.parentId = parentId; }
       toast('Saved ✓');
     } else {
-      reminders.push({ id: uid(), title, time: time ? new Date(time).toISOString() : null, tag: selectedTag, followup: addFollowUp, done: false, created: new Date().toISOString() });
+      reminders.push({ id: uid(), title, time: time ? new Date(time).toISOString() : null, tag: selectedTag, followup: addFollowUp, parentId, done: false, created: new Date().toISOString() });
       toast('Reminder added');
     }
     save(reminders);
@@ -497,8 +561,7 @@
 
   // ── Notifications ──
   function updateNotifBar() {
-    const bar = document.getElementById('notif-bar');
-    bar.classList.toggle('hidden', Notification.permission !== 'default');
+    document.getElementById('notif-bar').classList.toggle('hidden', Notification.permission !== 'default');
   }
 
   function requestNotifPermission() {
@@ -520,31 +583,27 @@
         scheduledTimers.push(setTimeout(() => new Notification('Ping', { body: r.title, tag: r.id }), ms));
       }
     });
-    // Tell service worker to schedule too
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_NOTIFICATIONS', reminders });
     }
   }
 
-  // ── Service Worker ──
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg failed:', err));
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
-  // ── Keyboard ──
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
     if (e.key === 'Enter' && document.getElementById('add-overlay').classList.contains('open')) submitReminder();
   });
 
   // ── Init ──
-  renderTagFilters();
+  buildFilterDrawer();
   render();
 
-  // Seed demo if empty
   if (reminders.length === 0) {
     const demo = new Date(); demo.setDate(demo.getDate()+1); demo.setHours(8,0,0,0);
-    reminders.push({ id: uid(), title: 'Submit PTO request', time: demo.toISOString(), tag: 'inc', followup: false, done: false, created: new Date().toISOString() });
+    reminders.push({ id: uid(), title: 'Submit PTO request', time: demo.toISOString(), tag: 'inc', followup: false, parentId: null, done: false, created: new Date().toISOString() });
     save(reminders); render();
   }
 </script>
