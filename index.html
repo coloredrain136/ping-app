@@ -731,7 +731,11 @@
       navigator.serviceWorker.controller.postMessage({type:'SCHEDULE_NOTIFICATIONS',reminders});
   }
 
-  if('serviceWorker'in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  if('serviceWorker'in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs=>{
+      regs.forEach(reg=>reg.unregister());
+    });
+  }
 
   // ── Keyboard — only submit on Enter if submit button or no input focused ──
   document.addEventListener('keydown',e=>{
