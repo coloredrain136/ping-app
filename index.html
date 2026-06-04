@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#0f0f10" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -19,43 +19,43 @@
       --text: #f0f0f2; --text-muted: #6b6b75; --text-dim: #9999a8;
       --danger: #f87171; --warn: #fbbf24; --radius: 16px; --radius-sm: 10px;
     }
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow: hidden; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Geist', sans-serif; overflow: hidden; }
     #app { display: flex; flex-direction: column; height: 100dvh; max-width: 480px; margin: 0 auto; position: relative; }
 
     /* Header */
     header { padding: 52px 24px 14px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0; }
-    .wordmark { font-size: 32px; font-weight: 800; letter-spacing: -1px; color: var(--text); line-height: 1; }
+    .wordmark { font-size: 32px; font-weight: 800; letter-spacing: -1.5px; color: var(--text); line-height: 1; }
     .wordmark span { color: var(--accent); }
     .header-right { display: flex; align-items: center; gap: 10px; }
-    .header-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); text-align: right; }
-    .filter-toggle-btn { background: transparent; border: 1px solid var(--border); border-radius: 100px; padding: 5px 12px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.15s ease; letter-spacing: 0.05em; }
+    .header-meta { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .filter-toggle-btn { background: transparent; border: 1px solid var(--border); border-radius: 100px; padding: 5px 12px; font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.15s ease; letter-spacing: 0.03em; }
     .filter-toggle-btn.active { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
-    .filter-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: none; }
+    .filter-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: none; flex-shrink: 0; }
     .filter-toggle-btn.filtered .filter-dot { display: block; }
 
     /* Filter drawer */
-    .filter-drawer { overflow: hidden; max-height: 0; transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease; opacity: 0; flex-shrink: 0; }
+    .filter-drawer { overflow: hidden; max-height: 0; transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease; opacity: 0; flex-shrink: 0; }
     .filter-drawer.open { max-height: 120px; opacity: 1; }
     .filter-drawer-inner { padding: 8px 24px 12px; display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag-filter-btn { font-family: 'DM Mono', monospace; font-size: 10px; padding: 5px 12px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+    .tag-filter-btn { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 5px 12px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
     .tag-filter-btn.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
 
     /* Tabs */
     .tabs { display: flex; gap: 8px; padding: 0 24px 14px; flex-shrink: 0; }
-    .tab { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+    .tab { font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 500; padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap; }
     .tab.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
 
     /* Notif bar */
-    .notif-bar { margin: 0 24px 10px; padding: 9px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.07); font-family: 'DM Mono', monospace; font-size: 11px; color: var(--warn); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
+    .notif-bar { margin: 0 24px 10px; padding: 9px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.07); font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--warn); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
     .notif-bar.hidden { display: none; }
-    .notif-bar-enable { background: none; border: none; color: var(--warn); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: underline; white-space: nowrap; }
+    .notif-bar-enable { background: none; border: none; color: var(--warn); font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: underline; white-space: nowrap; }
 
     /* List */
     .list-wrap { flex: 1; overflow-y: auto; padding: 0 24px 100px; -webkit-overflow-scrolling: touch; }
     .list-wrap::-webkit-scrollbar { display: none; }
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; color: var(--text-muted); }
     .empty-icon { font-size: 40px; opacity: 0.4; }
-    .empty-label { font-family: 'DM Mono', monospace; font-size: 13px; opacity: 0.5; }
+    .empty-label { font-family: 'Geist Mono', monospace; font-size: 13px; opacity: 0.5; }
 
     /* Cards */
     .reminder-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; transition: border-color 0.15s ease, opacity 0.2s ease; position: relative; overflow: hidden; }
@@ -63,85 +63,107 @@
     .reminder-card.overdue::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--danger); border-radius: 3px 0 0 3px; }
     .reminder-card.done { opacity: 0.4; }
     .reminder-card.is-child { margin-left: 20px; border-left: 2px solid var(--accent-dim); border-radius: 0 var(--radius) var(--radius) 0; }
-
     .check-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 12px; }
     .check-btn:hover { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
     .reminder-card.done .check-btn { border-color: var(--accent-dim); background: var(--accent-glow); color: var(--accent); }
-
     .card-body { flex: 1; min-width: 0; }
-    .card-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 5px; }
-    .reminder-card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 5px; cursor: pointer; transition: color 0.15s ease; }
+    .card-title:hover { color: var(--accent); }
+    .reminder-card.done .card-title { text-decoration: line-through; color: var(--text-muted); cursor: default; }
     .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
-    .card-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .card-time { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text-muted); }
     .card-time.overdue-label { color: var(--danger); }
-    .card-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
-    .followup-badge { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--warn); }
-
-    /* Stack indicator */
-    .stack-indicator { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); background: var(--accent-glow); border: 1px solid var(--accent-dim); padding: 2px 8px; border-radius: 100px; cursor: pointer; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 4px; }
-    .stack-indicator:hover { background: rgba(110,231,183,0.2); }
-    .stack-children { margin-top: 6px; }
-
+    .card-tag { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
+    .followup-badge { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--warn); }
+    .stack-indicator { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--accent); background: var(--accent-glow); border: 1px solid var(--accent-dim); padding: 2px 8px; border-radius: 100px; display: inline-flex; align-items: center; gap: 4px; }
+    .stack-children { margin-top: 0; }
     .card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-    .action-btn { font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
+    .action-btn { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
     .action-btn:hover { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
     .action-btn.danger:hover { border-color: rgba(248,113,113,0.4); color: var(--danger); background: rgba(248,113,113,0.08); }
+    .action-btn.gcal { color: #4285f4; border-color: rgba(66,133,244,0.3); }
+    .action-btn.gcal:hover { background: rgba(66,133,244,0.1); border-color: rgba(66,133,244,0.6); color: #4285f4; }
 
     /* FAB */
     .fab { position: absolute; bottom: 32px; right: 24px; width: 58px; height: 58px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #0f0f10; transition: transform 0.15s ease, box-shadow 0.15s ease; z-index: 10; }
     .fab:hover { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(110,231,183,0.15); }
     .fab:active { transform: scale(0.95); }
 
-    /* Overlays */
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: flex-end; backdrop-filter: blur(4px); }
+    /* ── Sheet overlay ── */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; }
     .overlay.open { display: flex; }
-    .sheet { background: var(--surface); border-radius: 24px 24px 0 0; border-top: 1px solid var(--border); width: 100%; max-width: 480px; margin: 0 auto; padding: 12px 24px 48px; animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1); max-height: 92dvh; overflow-y: auto; }
+
+    .sheet {
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 440px;
+      padding: 20px 24px 32px;
+      animation: scaleIn 0.22s cubic-bezier(0.34,1.4,0.64,1);
+      max-height: 82dvh;
+      overflow-y: auto;
+      position: relative;
+      /* Sit slightly below center for thumb reach */
+      margin-top: 10dvh;
+    }
     .sheet::-webkit-scrollbar { display: none; }
-    @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-    .sheet-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
-    .field-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px; }
-    .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 15px; outline: none; margin-bottom: 16px; transition: border-color 0.15s ease; -webkit-appearance: none; }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.94) translateY(12px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    /* Drag handle at top of sheet */
+    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; cursor: grab; }
+
+    .sheet-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; color: var(--text); letter-spacing: -0.3px; }
+    .field-label { font-family: 'Geist Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 7px; }
+    .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 13px; color: var(--text); font-family: 'Geist', sans-serif; font-size: 15px; outline: none; margin-bottom: 14px; transition: border-color 0.15s ease; -webkit-appearance: none; }
     .field-input:focus { border-color: var(--accent-dim); }
     .field-input::placeholder { color: var(--text-muted); }
-    input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
     select.field-input { cursor: pointer; }
     select.field-input option { background: #1f1f23; }
 
     /* Tag picker */
-    .tag-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-    .tag-pick-btn { font-family: 'DM Mono', monospace; font-size: 11px; padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
+    .tag-picker { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+    .tag-pick-btn { font-family: 'Geist Mono', monospace; font-size: 11px; padding: 5px 13px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
     .tag-pick-btn.selected { border-color: var(--accent-dim); background: var(--accent-glow); color: var(--accent); }
 
     /* Toggle */
-    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 16px; cursor: pointer; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 14px; cursor: pointer; }
     .toggle-label { font-size: 14px; font-weight: 600; color: var(--text); }
-    .toggle-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .toggle-sub { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
     .toggle-switch { width: 40px; height: 24px; border-radius: 100px; background: var(--border); position: relative; transition: background 0.2s ease; flex-shrink: 0; }
     .toggle-switch.on { background: var(--accent-dim); }
     .toggle-switch::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: transform 0.2s ease; }
     .toggle-switch.on::after { transform: translateX(16px); }
 
-    .submit-btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); background: var(--accent); border: none; color: #0f0f10; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s ease, transform 0.1s ease; margin-top: 4px; }
+    /* Follow-up date row — shown when followup toggled on */
+    .followup-date-row { display: none; margin-bottom: 14px; }
+    .followup-date-row.visible { display: block; }
+
+    .submit-btn { width: 100%; padding: 13px; border-radius: var(--radius-sm); background: var(--accent); border: none; color: #0f0f10; font-family: 'Geist', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s ease, transform 0.1s ease; margin-top: 2px; letter-spacing: -0.2px; }
     .submit-btn:hover { opacity: 0.9; }
     .submit-btn:active { transform: scale(0.98); }
 
     /* Snooze */
-    .snooze-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-    .snooze-option { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all 0.15s ease; }
+    .snooze-options { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
+    .snooze-option { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all 0.15s ease; }
     .snooze-option:hover { border-color: var(--accent-dim); background: var(--accent-glow); }
     .snooze-option-label { font-size: 14px; font-weight: 600; color: var(--text); }
-    .snooze-option-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .snooze-option-time { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text-muted); }
     .custom-snooze-row { display: flex; gap: 8px; align-items: center; }
     .custom-snooze-row .field-input { margin-bottom: 0; flex: 1; }
-    .custom-snooze-row .submit-btn { width: auto; padding: 12px 18px; margin-top: 0; flex-shrink: 0; }
+    .custom-snooze-row .submit-btn { width: auto; padding: 11px 16px; margin-top: 0; flex-shrink: 0; }
 
     /* Toast */
-    .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; padding: 10px 20px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-dim); opacity: 0; transition: all 0.25s ease; white-space: nowrap; z-index: 100; pointer-events: none; }
+    .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; padding: 10px 20px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--text-dim); opacity: 0; transition: all 0.25s ease; white-space: nowrap; z-index: 100; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Section label */
-    .section-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin: 14px 0 8px; opacity: 0.6; }
+    /* Touch drag for sheet dismiss */
+    .sheet { touch-action: pan-y; }
   </style>
 </head>
 <body>
@@ -151,8 +173,7 @@
     <div class="header-right">
       <div class="header-meta" id="header-meta">0 pending</div>
       <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleFilterDrawer()">
-        <div class="filter-dot"></div>
-        Filter
+        <div class="filter-dot"></div>Filter
       </button>
     </div>
   </header>
@@ -184,9 +205,9 @@
 </div>
 
 <!-- Add/Edit sheet -->
-<div class="overlay" id="add-overlay" onclick="overlayClick(event,'add-overlay')">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
+<div class="overlay" id="add-overlay" onclick="overlayBackdropClick(event,'add-overlay')">
+  <div class="sheet" id="add-sheet">
+    <div class="sheet-handle" id="add-handle"></div>
     <div class="sheet-title" id="add-sheet-title">New reminder</div>
     <div class="field-label">What do you need to do?</div>
     <input class="field-input" id="add-title" type="text" placeholder="e.g. Submit PTO request" maxlength="120" />
@@ -194,24 +215,26 @@
     <input class="field-input" id="add-time" type="datetime-local" />
     <div class="field-label">Tag</div>
     <div class="tag-picker" id="add-tag-picker"></div>
-    <div class="field-label">Link to another reminder (optional)</div>
-    <select class="field-input" id="add-parent-select">
-      <option value="">None — standalone reminder</option>
-    </select>
+    <div class="field-label">Link to another reminder</div>
+    <select class="field-input" id="add-parent-select"></select>
     <div class="toggle-row" id="followup-toggle" onclick="toggleFollowUp()">
       <div>
         <div class="toggle-label">Follow-up needed</div>
-        <div class="toggle-sub">Flag this as needing a follow-up</div>
+        <div class="toggle-sub">Creates a separate follow-up reminder</div>
       </div>
       <div class="toggle-switch" id="followup-switch"></div>
     </div>
-    <button class="submit-btn" id="add-submit-btn" onclick="submitReminder()">Add to Ping</button>
+    <div class="followup-date-row" id="followup-date-row">
+      <div class="field-label">Follow-up date &amp; time</div>
+      <input class="field-input" id="followup-time" type="datetime-local" style="margin-bottom:0" />
+    </div>
+    <button class="submit-btn" id="add-submit-btn" onclick="submitReminder()" style="margin-top:16px">Add to Ping</button>
   </div>
 </div>
 
 <!-- Snooze sheet -->
-<div class="overlay" id="snooze-overlay" onclick="overlayClick(event,'snooze-overlay')">
-  <div class="sheet">
+<div class="overlay" id="snooze-overlay" onclick="overlayBackdropClick(event,'snooze-overlay')">
+  <div class="sheet" id="snooze-sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">Snooze until…</div>
     <div class="snooze-options" id="snooze-options"></div>
@@ -233,7 +256,7 @@
     { id: 'fitness',    label: 'Fitness',    emoji: '🟢', bg: 'rgba(74,222,128,0.12)',  border: 'rgba(74,222,128,0.35)',  color: '#4ade80' },
     { id: 'health',     label: 'Health',     emoji: '🩵', bg: 'rgba(34,211,238,0.12)',  border: 'rgba(34,211,238,0.35)',  color: '#22d3ee' },
     { id: 'pickleball', label: 'Pickleball', emoji: '🥒', bg: 'rgba(163,230,53,0.12)',  border: 'rgba(163,230,53,0.35)',  color: '#a3e635' },
-    { id: 'later',      label: 'Later',      emoji: '🌫️', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.35)', color: '#94a3b8' },
+    { id: 'later',      label: 'Later',      emoji: '💤', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.35)', color: '#94a3b8' },
   ];
 
   function getTag(id) { return TAGS.find(t => t.id === id) || null; }
@@ -281,13 +304,23 @@
 
   function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+  // ── Google Calendar URL ──
+  function openGCal(r) {
+    if (!r.time) { toast('Set a time first to schedule'); return; }
+    const start = new Date(r.time);
+    const end = new Date(start.getTime() + 60*60*1000); // default 1hr
+    const fmt = d => d.toISOString().replace(/-|:|\.\d{3}/g,'');
+    const title = encodeURIComponent(r.title);
+    const details = encodeURIComponent('Added from Ping');
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${fmt(start)}/${fmt(end)}&details=${details}`;
+    window.open(url, '_blank');
+  }
+
   // ── Filter drawer ──
   function toggleFilterDrawer() {
     filterDrawerOpen = !filterDrawerOpen;
-    const drawer = document.getElementById('filter-drawer');
-    const btn = document.getElementById('filter-toggle-btn');
-    drawer.classList.toggle('open', filterDrawerOpen);
-    btn.classList.toggle('active', filterDrawerOpen);
+    document.getElementById('filter-drawer').classList.toggle('open', filterDrawerOpen);
+    document.getElementById('filter-toggle-btn').classList.toggle('active', filterDrawerOpen);
   }
 
   function buildFilterDrawer() {
@@ -308,13 +341,11 @@
   }
 
   function updateFilterBtn() {
-    const btn = document.getElementById('filter-toggle-btn');
-    btn.classList.toggle('filtered', activeTagFilter !== null);
+    document.getElementById('filter-toggle-btn').classList.toggle('filtered', activeTagFilter !== null);
   }
 
-  // ── Stacks: get children of a reminder ──
+  // ── Stacks ──
   function getChildren(parentId) { return reminders.filter(r => r.parentId === parentId); }
-  function isChild(r) { return !!r.parentId; }
 
   // ── Render ──
   function render() {
@@ -332,27 +363,22 @@
     if (currentFilter === 'followup') filtered = filtered.filter(r => r.followup && !r.done);
     if (activeTagFilter) filtered = filtered.filter(r => r.tag === activeTagFilter);
 
-    // In normal views, only show top-level (non-child) reminders — children render under parent
-    const topLevel = currentFilter === 'all' || currentFilter === 'done'
-      ? filtered.filter(r => !r.parentId)
-      : filtered.filter(r => !r.parentId);
-
-    wrap.querySelectorAll('.reminder-card, .section-label, .stack-children').forEach(el => el.remove());
+    const topLevel = filtered.filter(r => !r.parentId);
+    wrap.querySelectorAll('.reminder-card, .stack-children').forEach(el => el.remove());
     empty.style.display = topLevel.length === 0 ? 'flex' : 'none';
 
     topLevel.forEach(r => {
       wrap.appendChild(buildCard(r, false));
-      // Render children under parent
       const children = getChildren(r.id).filter(c => {
         if (currentFilter === 'done') return c.done;
         if (currentFilter === 'pending' || currentFilter === 'followup') return !c.done;
         return true;
       });
       if (children.length > 0) {
-        const childWrap = document.createElement('div');
-        childWrap.className = 'stack-children';
-        children.forEach(c => childWrap.appendChild(buildCard(c, true)));
-        wrap.appendChild(childWrap);
+        const cw = document.createElement('div');
+        cw.className = 'stack-children';
+        children.forEach(c => cw.appendChild(buildCard(c, true)));
+        wrap.appendChild(cw);
       }
     });
 
@@ -366,21 +392,18 @@
     const children = getChildren(r.id);
     const card = document.createElement('div');
     card.className = `reminder-card${overdue ? ' overdue' : ''}${r.done ? ' done' : ''}${isChildCard ? ' is-child' : ''}`;
-    card.dataset.id = r.id;
 
     const tagHtml = tag ? `<span class="card-tag" style="background:${tag.bg};border:1px solid ${tag.border};color:${tag.color}">${tag.emoji} ${tag.label}</span>` : '';
     const followupHtml = r.followup && !r.done ? `<span class="followup-badge">↩ follow-up</span>` : '';
-    const stackHtml = !isChildCard && children.length > 0
-      ? `<span class="stack-indicator" onclick="event.stopPropagation()">⛓ ${children.length} linked</span>` : '';
-
+    const stackHtml = !isChildCard && children.length > 0 ? `<span class="stack-indicator">⛓ ${children.length} linked</span>` : '';
     const parentR = r.parentId ? reminders.find(p => p.id === r.parentId) : null;
-    const parentHtml = parentR ? `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:4px">↑ ${escHtml(parentR.title)}</div>` : '';
+    const parentHtml = parentR ? `<div style="font-family:'Geist Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:4px">↑ ${escHtml(parentR.title)}</div>` : '';
 
     card.innerHTML = `
       <button class="check-btn" onclick="toggleDone('${r.id}')" aria-label="Complete">✓</button>
       <div class="card-body">
         ${parentHtml}
-        <div class="card-title">${escHtml(r.title)}</div>
+        <div class="card-title" onclick="${r.done ? '' : `openEdit('${r.id}')`}">${escHtml(r.title)}</div>
         <div class="card-meta">
           <span class="card-time ${overdue ? 'overdue-label' : ''}">${overdue ? '⚠ ' : ''}${formatTime(r.time)}</span>
           ${tagHtml}${followupHtml}${stackHtml}
@@ -388,8 +411,8 @@
         ${!r.done ? `
         <div class="card-actions">
           <button class="action-btn" onclick="openSnooze('${r.id}')">Snooze</button>
-          <button class="action-btn" onclick="openEdit('${r.id}')">Edit</button>
           <button class="action-btn danger" onclick="deleteReminder('${r.id}')">Remove</button>
+          ${r.time ? `<button class="action-btn gcal" onclick="openGCal(reminders.find(x=>x.id==='${r.id}'))">📅 Schedule</button>` : ''}
         </div>` : `
         <div class="card-actions">
           <button class="action-btn danger" onclick="deleteReminder('${r.id}')">Remove</button>
@@ -408,7 +431,6 @@
   }
 
   function deleteReminder(id) {
-    // Also unlink any children
     reminders.forEach(r => { if (r.parentId === id) r.parentId = null; });
     reminders = reminders.filter(r => r.id !== id);
     save(reminders); render(); toast('Removed');
@@ -446,9 +468,11 @@
     reminders
       .filter(r => r.id !== excludeId && !r.parentId && !r.done)
       .forEach(r => {
+        const tag = r.tag ? getTag(r.tag) : null;
+        const tagLabel = tag ? ` ${tag.emoji}` : '';
         const opt = document.createElement('option');
         opt.value = r.id;
-        opt.textContent = r.title.length > 50 ? r.title.slice(0,50) + '…' : r.title;
+        opt.textContent = (r.title.length > 40 ? r.title.slice(0,40)+'…' : r.title) + tagLabel;
         if (r.id === currentParentId) opt.selected = true;
         sel.appendChild(opt);
       });
@@ -458,9 +482,14 @@
   function toggleFollowUp() {
     addFollowUp = !addFollowUp;
     document.getElementById('followup-switch').classList.toggle('on', addFollowUp);
+    document.getElementById('followup-date-row').classList.toggle('visible', addFollowUp);
+    if (addFollowUp) {
+      const fu = new Date(); fu.setDate(fu.getDate()+1); fu.setHours(8,0,0,0);
+      document.getElementById('followup-time').value = toLocalISO(fu);
+    }
   }
 
-  // ── Add ──
+  // ── Open Add ──
   function openAdd() {
     editingId = null; addFollowUp = false; selectedTag = null;
     document.getElementById('add-sheet-title').textContent = 'New reminder';
@@ -469,13 +498,14 @@
     const now = new Date(); now.setMinutes(now.getMinutes() - now.getMinutes() % 5 + 5);
     document.getElementById('add-time').value = toLocalISO(now);
     document.getElementById('followup-switch').classList.remove('on');
+    document.getElementById('followup-date-row').classList.remove('visible');
     buildTagPicker(null);
     buildParentSelect(null, null);
     document.getElementById('add-overlay').classList.add('open');
     setTimeout(() => document.getElementById('add-title').focus(), 300);
   }
 
-  // ── Edit ──
+  // ── Open Edit ──
   function openEdit(id) {
     const r = reminders.find(r => r.id === id);
     if (!r) return;
@@ -485,6 +515,7 @@
     document.getElementById('add-title').value = r.title;
     document.getElementById('add-time').value = r.time ? toLocalISO(new Date(r.time)) : '';
     document.getElementById('followup-switch').classList.toggle('on', addFollowUp);
+    document.getElementById('followup-date-row').classList.toggle('visible', addFollowUp);
     buildTagPicker(selectedTag);
     buildParentSelect(id, r.parentId || null);
     document.getElementById('add-overlay').classList.add('open');
@@ -496,15 +527,34 @@
     const title = document.getElementById('add-title').value.trim();
     const time = document.getElementById('add-time').value;
     const parentId = document.getElementById('add-parent-select').value || null;
+    const followupTimeVal = document.getElementById('followup-time').value;
     if (!title) { toast('Add a title first'); return; }
+
+    let savedId;
     if (editingId) {
       const r = reminders.find(r => r.id === editingId);
       if (r) { r.title = title; r.time = time ? new Date(time).toISOString() : null; r.tag = selectedTag; r.followup = addFollowUp; r.parentId = parentId; }
+      savedId = editingId;
       toast('Saved ✓');
     } else {
-      reminders.push({ id: uid(), title, time: time ? new Date(time).toISOString() : null, tag: selectedTag, followup: addFollowUp, parentId, done: false, created: new Date().toISOString() });
+      savedId = uid();
+      reminders.push({ id: savedId, title, time: time ? new Date(time).toISOString() : null, tag: selectedTag, followup: addFollowUp, parentId, done: false, created: new Date().toISOString() });
       toast('Reminder added');
     }
+
+    // Create follow-up reminder if toggled and time is set
+    if (addFollowUp && followupTimeVal) {
+      const existing = reminders.find(r => r.parentId === savedId && r.isFollowup);
+      if (!existing) {
+        reminders.push({
+          id: uid(), title: `Follow-up: ${title}`,
+          time: new Date(followupTimeVal).toISOString(),
+          tag: selectedTag, followup: false, parentId: savedId,
+          isFollowup: true, done: false, created: new Date().toISOString()
+        });
+      }
+    }
+
     save(reminders);
     document.getElementById('add-overlay').classList.remove('open');
     render();
@@ -516,7 +566,7 @@
     const tonight = new Date(now); tonight.setHours(21,30,0,0); if (tonight <= now) tonight.setDate(tonight.getDate()+1);
     const tomorrow = new Date(now); tomorrow.setDate(now.getDate()+1); tomorrow.setHours(8,0,0,0);
     const oneHour = new Date(now.getTime() + 60*60*1000);
-    const weekend = new Date(now); const daysUntilSat = now.getDay()===6?7:6-now.getDay(); weekend.setDate(now.getDate()+daysUntilSat); weekend.setHours(15,0,0,0);
+    const weekend = new Date(now); const dsu = now.getDay()===6?7:6-now.getDay(); weekend.setDate(now.getDate()+dsu); weekend.setHours(15,0,0,0);
     return [
       { label: 'In 1 hour',        time: oneHour,  display: formatTime(oneHour.toISOString()) },
       { label: 'Tonight',          time: tonight,  display: formatTime(tonight.toISOString()) },
@@ -556,21 +606,42 @@
     applySnooze(new Date(val).toISOString());
   }
 
-  // ── Overlay ──
-  function overlayClick(e, id) { if (e.target === document.getElementById(id)) document.getElementById(id).classList.remove('open'); }
+  // ── Overlay dismiss ──
+  function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+  function overlayBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeOverlay(id); }
+
+  // ── Swipe down to dismiss sheets ──
+  function initSwipeDismiss(sheetId, overlayId) {
+    const sheet = document.getElementById(sheetId);
+    let startY = 0, currentY = 0, dragging = false;
+    sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; dragging = true; }, { passive: true });
+    sheet.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      currentY = e.touches[0].clientY;
+      const dy = currentY - startY;
+      if (dy > 0) sheet.style.transform = `translateY(${dy}px)`;
+    }, { passive: true });
+    sheet.addEventListener('touchend', () => {
+      dragging = false;
+      const dy = currentY - startY;
+      if (dy > 80) { closeOverlay(overlayId); sheet.style.transform = ''; }
+      else { sheet.style.transform = ''; }
+    });
+  }
+
+  initSwipeDismiss('add-sheet', 'add-overlay');
+  initSwipeDismiss('snooze-sheet', 'snooze-overlay');
 
   // ── Notifications ──
   function updateNotifBar() {
     document.getElementById('notif-bar').classList.toggle('hidden', Notification.permission !== 'default');
   }
-
   function requestNotifPermission() {
     Notification.requestPermission().then(p => {
-      if (p === 'granted') { toast('Notifications on ✓'); render(); }
-      else toast('Notifications blocked');
+      toast(p === 'granted' ? 'Notifications on ✓' : 'Notifications blocked');
+      if (p === 'granted') render();
     });
   }
-
   let scheduledTimers = [];
   function scheduleNotifications() {
     scheduledTimers.forEach(t => clearTimeout(t));
@@ -579,19 +650,16 @@
     const now = Date.now();
     reminders.filter(r => !r.done && r.time).forEach(r => {
       const ms = new Date(r.time).getTime() - now;
-      if (ms > 0 && ms < 24*60*60*1000) {
+      if (ms > 0 && ms < 24*60*60*1000)
         scheduledTimers.push(setTimeout(() => new Notification('Ping', { body: r.title, tag: r.id }), ms));
-      }
     });
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller)
       navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_NOTIFICATIONS', reminders });
-    }
   }
 
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
+  // ── Keyboard ──
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
     if (e.key === 'Enter' && document.getElementById('add-overlay').classList.contains('open')) submitReminder();
