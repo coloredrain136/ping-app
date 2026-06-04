@@ -498,7 +498,7 @@
       <button class="check-btn" onclick="toggleDone('${r.id}')" aria-label="Complete">✓</button>
       <div class="card-body">
         ${parentHtml}
-        <div class="card-title" onclick="${r.done?'':``openEdit('${r.id}')``}">${escHtml(r.title)}</div>
+        <div class="card-title" onclick="${r.done?'':'openEdit(\''+r.id+'\')'}">${escHtml(r.title)}</div>
         <div class="card-meta">
           <span class="card-time${overdue?' overdue-label':''}">${overdue?'⚠ ':''}${formatTime(r.time)}</span>
           ${tagHtml}${fuHtml}${stackHtml}
