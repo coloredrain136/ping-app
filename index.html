@@ -31,479 +31,120 @@
       --radius-sm: 10px;
     }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      overflow: hidden;
-    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; overflow: hidden; }
 
-    /* ── Layout ── */
-    #app {
-      display: flex;
-      flex-direction: column;
-      height: 100dvh;
-      max-width: 480px;
-      margin: 0 auto;
-      position: relative;
-    }
+    #app { display: flex; flex-direction: column; height: 100dvh; max-width: 480px; margin: 0 auto; position: relative; }
 
-    /* ── Header ── */
-    header {
-      padding: 56px 24px 16px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
+    header { padding: 56px 24px 16px; display: flex; align-items: flex-end; justify-content: space-between; flex-shrink: 0; }
 
-    .wordmark {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      color: var(--text);
-      line-height: 1;
-    }
+    .wordmark { font-size: 32px; font-weight: 800; letter-spacing: -1px; color: var(--text); line-height: 1; }
+    .wordmark span { color: var(--accent); }
+    .header-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); text-align: right; line-height: 1.6; }
 
-    .wordmark span {
-      color: var(--accent);
-    }
+    /* Tabs */
+    .tabs { display: flex; gap: 8px; padding: 0 24px 12px; flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+    .tab.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
 
-    .header-meta {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-      text-align: right;
-      line-height: 1.6;
-    }
+    /* Tag filter row */
+    .tag-filters { display: flex; gap: 6px; padding: 0 24px 14px; flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tag-filters::-webkit-scrollbar { display: none; }
+    .tag-filter-btn { font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; white-space: nowrap; flex-shrink: 0; }
+    .tag-filter-btn.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
 
-    /* ── Filter tabs ── */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      padding: 0 24px 16px;
-      flex-shrink: 0;
-    }
-
-    .tab {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 500;
-      padding: 6px 14px;
-      border-radius: 100px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .tab.active {
-      background: var(--accent-glow);
-      border-color: var(--accent-dim);
-      color: var(--accent);
-    }
-
-    /* ── List ── */
-    .list-wrap {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 24px;
-      -webkit-overflow-scrolling: touch;
-    }
-
+    /* List */
+    .list-wrap { flex: 1; overflow-y: auto; padding: 0 24px 100px; -webkit-overflow-scrolling: touch; }
     .list-wrap::-webkit-scrollbar { display: none; }
 
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      gap: 12px;
-      color: var(--text-muted);
-    }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; color: var(--text-muted); }
+    .empty-icon { font-size: 40px; opacity: 0.4; }
+    .empty-label { font-family: 'DM Mono', monospace; font-size: 13px; opacity: 0.5; }
 
-    .empty-icon {
-      font-size: 40px;
-      opacity: 0.4;
-    }
+    /* Card */
+    .reminder-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start; transition: border-color 0.15s ease, opacity 0.2s ease; position: relative; overflow: hidden; }
+    .reminder-card.overdue { border-color: rgba(248,113,113,0.3); }
+    .reminder-card.overdue::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--danger); border-radius: 3px 0 0 3px; }
+    .reminder-card.done { opacity: 0.4; }
 
-    .empty-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      opacity: 0.5;
-    }
+    .check-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; color: transparent; font-size: 12px; }
+    .check-btn:hover { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+    .reminder-card.done .check-btn { border-color: var(--accent-dim); background: var(--accent-glow); color: var(--accent); }
 
-    /* ── Reminder card ── */
-    .reminder-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 10px;
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-      transition: border-color 0.15s ease, opacity 0.2s ease;
-      position: relative;
-      overflow: hidden;
-    }
+    .card-body { flex: 1; min-width: 0; }
+    .card-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.3; margin-bottom: 5px; }
+    .reminder-card.done .card-title { text-decoration: line-through; color: var(--text-muted); }
 
-    .reminder-card.overdue {
-      border-color: rgba(248, 113, 113, 0.3);
-    }
+    .card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+    .card-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .card-time.overdue-label { color: var(--danger); }
 
-    .reminder-card.overdue::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: var(--danger);
-      border-radius: 3px 0 0 3px;
-    }
+    .card-tag { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
 
-    .reminder-card.done {
-      opacity: 0.4;
-    }
+    .followup-badge { font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--warn); }
 
-    .check-btn {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      background: transparent;
-      cursor: pointer;
-      flex-shrink: 0;
-      margin-top: 2px;
-      transition: all 0.15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: transparent;
-      font-size: 12px;
-    }
+    .card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .action-btn { font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
+    .action-btn:hover { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+    .action-btn.danger:hover { border-color: rgba(248,113,113,0.4); color: var(--danger); background: rgba(248,113,113,0.08); }
 
-    .check-btn:hover {
-      border-color: var(--accent);
-      background: var(--accent-glow);
-      color: var(--accent);
-    }
+    /* FAB */
+    .fab { position: absolute; bottom: 32px; right: 24px; width: 58px; height: 58px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #0f0f10; box-shadow: 0 0 0 0 rgba(110,231,183,0.4); transition: transform 0.15s ease, box-shadow 0.15s ease; z-index: 10; }
+    .fab:hover { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(110,231,183,0.15); }
+    .fab:active { transform: scale(0.95); }
 
-    .reminder-card.done .check-btn {
-      border-color: var(--accent-dim);
-      background: var(--accent-glow);
-      color: var(--accent);
-    }
+    /* Overlay / Sheet */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; display: none; align-items: flex-end; backdrop-filter: blur(4px); }
+    .overlay.open { display: flex; }
+    .sheet { background: var(--surface); border-radius: 24px 24px 0 0; border-top: 1px solid var(--border); width: 100%; max-width: 480px; margin: 0 auto; padding: 12px 24px 48px; animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1); max-height: 90dvh; overflow-y: auto; }
+    .sheet::-webkit-scrollbar { display: none; }
+    @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    .card-body {
-      flex: 1;
-      min-width: 0;
-    }
+    .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+    .sheet-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
 
-    .card-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.3;
-      margin-bottom: 5px;
-    }
+    .field-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px; }
+    .field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; color: var(--text); font-family: 'Syne', sans-serif; font-size: 15px; outline: none; margin-bottom: 16px; transition: border-color 0.15s ease; -webkit-appearance: none; }
+    .field-input:focus { border-color: var(--accent-dim); }
+    .field-input::placeholder { color: var(--text-muted); }
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
 
-    .reminder-card.done .card-title {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
+    /* Tag picker */
+    .tag-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .tag-pick-btn { font-family: 'DM Mono', monospace; font-size: 11px; padding: 6px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; }
+    .tag-pick-btn.selected { border-color: var(--accent-dim); background: var(--accent-glow); color: var(--accent); }
 
-    .card-time {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    /* Follow-up toggle */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 16px; cursor: pointer; }
+    .toggle-label { font-size: 14px; font-weight: 600; color: var(--text); }
+    .toggle-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .toggle-switch { width: 40px; height: 24px; border-radius: 100px; background: var(--border); position: relative; transition: background 0.2s ease; flex-shrink: 0; }
+    .toggle-switch.on { background: var(--accent-dim); }
+    .toggle-switch::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: transform 0.2s ease; }
+    .toggle-switch.on::after { transform: translateX(16px); }
 
-    .card-time.overdue-label {
-      color: var(--danger);
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .snooze-btn, .delete-btn {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      padding: 4px 10px;
-      border-radius: 100px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s ease;
-      letter-spacing: 0.03em;
-    }
-
-    .snooze-btn:hover {
-      border-color: var(--accent-dim);
-      color: var(--accent);
-      background: var(--accent-glow);
-    }
-
-    .delete-btn:hover {
-      border-color: rgba(248,113,113,0.4);
-      color: var(--danger);
-      background: rgba(248,113,113,0.08);
-    }
-
-    /* ── FAB ── */
-    .fab {
-      position: absolute;
-      bottom: 32px;
-      right: 24px;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      color: #0f0f10;
-      box-shadow: 0 0 0 0 rgba(110, 231, 183, 0.4);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      z-index: 10;
-    }
-
-    .fab:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 0 8px rgba(110, 231, 183, 0.15);
-    }
-
-    .fab:active {
-      transform: scale(0.95);
-    }
-
-    /* ── Bottom sheet overlay ── */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 50;
-      display: none;
-      align-items: flex-end;
-      backdrop-filter: blur(4px);
-    }
-
-    .overlay.open {
-      display: flex;
-    }
-
-    .sheet {
-      background: var(--surface);
-      border-radius: 24px 24px 0 0;
-      border-top: 1px solid var(--border);
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 12px 24px 40px;
-      animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .sheet-handle {
-      width: 36px;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 0 auto 20px;
-    }
-
-    .sheet-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: var(--text);
-    }
-
-    .field-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-
-    .field-input {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      outline: none;
-      margin-bottom: 16px;
-      transition: border-color 0.15s ease;
-      -webkit-appearance: none;
-    }
-
-    .field-input:focus {
-      border-color: var(--accent-dim);
-    }
-
-    .field-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    /* datetime input styling */
-    input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-      filter: invert(0.6);
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 14px;
-      border-radius: var(--radius-sm);
-      background: var(--accent);
-      border: none;
-      color: #0f0f10;
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity 0.15s ease, transform 0.1s ease;
-      margin-top: 4px;
-    }
-
+    .submit-btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); background: var(--accent); border: none; color: #0f0f10; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.15s ease, transform 0.1s ease; margin-top: 4px; }
     .submit-btn:hover { opacity: 0.9; }
     .submit-btn:active { transform: scale(0.98); }
 
-    /* ── Snooze sheet ── */
-    .snooze-options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
+    /* Snooze */
+    .snooze-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .snooze-option { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all 0.15s ease; }
+    .snooze-option:hover { border-color: var(--accent-dim); background: var(--accent-glow); }
+    .snooze-option-label { font-size: 14px; font-weight: 600; color: var(--text); }
+    .snooze-option-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .custom-snooze-row { display: flex; gap: 8px; align-items: center; }
+    .custom-snooze-row .field-input { margin-bottom: 0; flex: 1; }
+    .custom-snooze-row .submit-btn { width: auto; padding: 12px 18px; margin-top: 0; flex-shrink: 0; }
 
-    .snooze-option {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
+    /* Toast */
+    .toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--surface2); border: 1px solid var(--border); border-radius: 100px; padding: 10px 20px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-dim); opacity: 0; transition: all 0.25s ease; white-space: nowrap; z-index: 100; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .snooze-option:hover {
-      border-color: var(--accent-dim);
-      background: var(--accent-glow);
-    }
-
-    .snooze-option-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .snooze-option-time {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    /* custom snooze row */
-    .custom-snooze-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .custom-snooze-row .field-input {
-      margin-bottom: 0;
-      flex: 1;
-    }
-
-    .custom-snooze-row .submit-btn {
-      width: auto;
-      padding: 12px 18px;
-      margin-top: 0;
-      flex-shrink: 0;
-    }
-
-    /* ── Toast ── */
-    .toast {
-      position: fixed;
-      bottom: 110px;
-      left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 10px 20px;
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: var(--text-dim);
-      opacity: 0;
-      transition: all 0.25s ease;
-      white-space: nowrap;
-      z-index: 100;
-      pointer-events: none;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* ── Notif banner ── */
-    .notif-bar {
-      margin: 0 24px 12px;
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(251,191,36,0.3);
-      background: rgba(251,191,36,0.07);
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--warn);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-
+    /* Notif bar */
+    .notif-bar { margin: 0 24px 12px; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.07); font-family: 'DM Mono', monospace; font-size: 11px; color: var(--warn); display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
     .notif-bar.hidden { display: none; }
-
-    .notif-bar-enable {
-      background: none;
-      border: none;
-      color: var(--warn);
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: underline;
-      white-space: nowrap;
-    }
+    .notif-bar-enable { background: none; border: none; color: var(--warn); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: underline; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -520,35 +161,47 @@
 
   <div class="tabs">
     <button class="tab active" onclick="setFilter('pending', this)">Pending</button>
+    <button class="tab" onclick="setFilter('followup', this)">Follow-up</button>
     <button class="tab" onclick="setFilter('all', this)">All</button>
     <button class="tab" onclick="setFilter('done', this)">Done</button>
   </div>
 
+  <div class="tag-filters" id="tag-filters"></div>
+
   <div class="list-wrap" id="list-wrap">
     <div class="empty-state" id="empty-state">
       <div class="empty-icon">🔔</div>
-      <div class="empty-label">nothing pending</div>
+      <div class="empty-label">nothing here</div>
     </div>
   </div>
 
   <button class="fab" onclick="openAdd()" aria-label="Add reminder">+</button>
 </div>
 
-<!-- Add sheet -->
-<div class="overlay" id="add-overlay" onclick="overlayClick(event, 'add-overlay')">
+<!-- Add/Edit sheet -->
+<div class="overlay" id="add-overlay" onclick="overlayClick(event,'add-overlay')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">New reminder</div>
+    <div class="sheet-title" id="add-sheet-title">New reminder</div>
     <div class="field-label">What do you need to do?</div>
     <input class="field-input" id="add-title" type="text" placeholder="e.g. Submit PTO request" maxlength="120" />
     <div class="field-label">When?</div>
     <input class="field-input" id="add-time" type="datetime-local" />
-    <button class="submit-btn" onclick="addReminder()">Add to Ping</button>
+    <div class="field-label">Tag</div>
+    <div class="tag-picker" id="add-tag-picker"></div>
+    <div class="toggle-row" id="followup-toggle" onclick="toggleFollowUp()">
+      <div>
+        <div class="toggle-label">Follow-up needed</div>
+        <div class="toggle-sub">Flag this as needing a follow-up</div>
+      </div>
+      <div class="toggle-switch" id="followup-switch"></div>
+    </div>
+    <button class="submit-btn" id="add-submit-btn" onclick="submitReminder()">Add to Ping</button>
   </div>
 </div>
 
 <!-- Snooze sheet -->
-<div class="overlay" id="snooze-overlay" onclick="overlayClick(event, 'snooze-overlay')">
+<div class="overlay" id="snooze-overlay" onclick="overlayClick(event,'snooze-overlay')">
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">Snooze until…</div>
@@ -561,49 +214,51 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
+  // ── Tags ──
+  const TAGS = [
+    { id: 'inc',        label: 'INC',         emoji: '🔴', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.35)', color: '#f87171' },
+    { id: 'homedepot',  label: 'Home Depot',  emoji: '🟠', bg: 'rgba(251,146,60,0.12)',  border: 'rgba(251,146,60,0.35)',  color: '#fb923c' },
+    { id: 'personal',   label: 'Personal',    emoji: '🔵', bg: 'rgba(96,165,250,0.12)',  border: 'rgba(96,165,250,0.35)',  color: '#60a5fa' },
+    { id: 'fitness',    label: 'Fitness',     emoji: '🟢', bg: 'rgba(74,222,128,0.12)',  border: 'rgba(74,222,128,0.35)',  color: '#4ade80' },
+    { id: 'health',     label: 'Health',      emoji: '🩵', bg: 'rgba(34,211,238,0.12)',  border: 'rgba(34,211,238,0.35)',  color: '#22d3ee' },
+    { id: 'pickleball', label: 'Pickleball',  emoji: '🥒', bg: 'rgba(163,230,53,0.12)',  border: 'rgba(163,230,53,0.35)',  color: '#a3e635' },
+    { id: 'later',      label: 'Later',       emoji: '🌫️', bg: 'rgba(148,163,184,0.12)', border: 'rgba(148,163,184,0.35)', color: '#94a3b8' },
+  ];
+
+  function getTag(id) { return TAGS.find(t => t.id === id) || null; }
+
   // ── Storage ──
   const STORAGE_KEY = 'ping_reminders';
-
-  function load() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch { return []; }
-  }
-
-  function save(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
+  function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+  function save(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
   // ── State ──
   let reminders = load();
   let currentFilter = 'pending';
+  let activeTagFilter = null;
   let snoozeTargetId = null;
+  let editingId = null;
+  let addFollowUp = false;
+  let selectedTag = null;
 
   // ── Helpers ──
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2);
-  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
   function formatTime(iso) {
     if (!iso) return 'No time set';
     const d = new Date(iso);
     const now = new Date();
-    const isToday = d.toDateString() === now.toDateString();
     const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
-    const isTomorrow = d.toDateString() === tomorrow.toDateString();
     const timeStr = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-    if (isToday) return `Today ${timeStr}`;
-    if (isTomorrow) return `Tomorrow ${timeStr}`;
+    if (d.toDateString() === now.toDateString()) return `Today ${timeStr}`;
+    if (d.toDateString() === tomorrow.toDateString()) return `Tomorrow ${timeStr}`;
     return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' ' + timeStr;
   }
 
-  function isOverdue(r) {
-    if (!r.time || r.done) return false;
-    return new Date(r.time) < new Date();
-  }
+  function isOverdue(r) { return !!(r.time && !r.done && new Date(r.time) < new Date()); }
 
   function toast(msg) {
     const el = document.getElementById('toast');
@@ -612,40 +267,31 @@
     setTimeout(() => el.classList.remove('show'), 2200);
   }
 
-  function pendingCount() {
-    return reminders.filter(r => !r.done).length;
+  function pendingCount() { return reminders.filter(r => !r.done).length; }
+
+  function toLocalISO(d) {
+    const p = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
   }
 
-  // ── Snooze presets ──
-  function getSnoozePresets() {
-    const now = new Date();
+  function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    // Tonight 9:30pm
-    const tonight = new Date(now);
-    tonight.setHours(21, 30, 0, 0);
-    if (tonight <= now) tonight.setDate(tonight.getDate() + 1);
-
-    // Tomorrow 8am
-    const tomorrow = new Date(now);
-    tomorrow.setDate(now.getDate() + 1);
-    tomorrow.setHours(8, 0, 0, 0);
-
-    // In 1 hour
-    const oneHour = new Date(now.getTime() + 60 * 60 * 1000);
-
-    // This weekend — next Saturday 3pm
-    const weekend = new Date(now);
-    const day = now.getDay(); // 0=Sun
-    const daysUntilSat = day === 6 ? 7 : (6 - day);
-    weekend.setDate(now.getDate() + daysUntilSat);
-    weekend.setHours(15, 0, 0, 0);
-
-    return [
-      { label: 'In 1 hour', time: oneHour, display: formatTime(oneHour.toISOString()) },
-      { label: 'Tonight', time: tonight, display: formatTime(tonight.toISOString()) },
-      { label: 'Tomorrow morning', time: tomorrow, display: formatTime(tomorrow.toISOString()) },
-      { label: 'This weekend', time: weekend, display: formatTime(weekend.toISOString()) },
-    ];
+  // ── Tag filter row ──
+  function renderTagFilters() {
+    const container = document.getElementById('tag-filters');
+    container.innerHTML = '';
+    const allBtn = document.createElement('button');
+    allBtn.className = 'tag-filter-btn' + (activeTagFilter === null ? ' active' : '');
+    allBtn.textContent = 'All tags';
+    allBtn.onclick = () => { activeTagFilter = null; renderTagFilters(); render(); };
+    container.appendChild(allBtn);
+    TAGS.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'tag-filter-btn' + (activeTagFilter === t.id ? ' active' : '');
+      btn.textContent = t.emoji + ' ' + t.label;
+      btn.onclick = () => { activeTagFilter = activeTagFilter === t.id ? null : t.id; renderTagFilters(); render(); };
+      container.appendChild(btn);
+    });
   }
 
   // ── Render ──
@@ -653,46 +299,50 @@
     const wrap = document.getElementById('list-wrap');
     const empty = document.getElementById('empty-state');
     const meta = document.getElementById('header-meta');
-
     const count = pendingCount();
     meta.textContent = count === 0 ? 'all clear' : `${count} pending`;
 
     let filtered = [...reminders].sort((a, b) => {
-      if (!a.time) return 1;
-      if (!b.time) return -1;
+      if (!a.time) return 1; if (!b.time) return -1;
       return new Date(a.time) - new Date(b.time);
     });
 
     if (currentFilter === 'pending') filtered = filtered.filter(r => !r.done);
     if (currentFilter === 'done') filtered = filtered.filter(r => r.done);
+    if (currentFilter === 'followup') filtered = filtered.filter(r => r.followup && !r.done);
+    if (activeTagFilter) filtered = filtered.filter(r => r.tag === activeTagFilter);
 
-    // clear existing cards
     wrap.querySelectorAll('.reminder-card').forEach(el => el.remove());
     empty.style.display = filtered.length === 0 ? 'flex' : 'none';
 
     filtered.forEach(r => {
       const overdue = isOverdue(r);
+      const tag = r.tag ? getTag(r.tag) : null;
       const card = document.createElement('div');
       card.className = `reminder-card${overdue ? ' overdue' : ''}${r.done ? ' done' : ''}`;
       card.dataset.id = r.id;
+
+      const tagHtml = tag ? `<span class="card-tag" style="background:${tag.bg};border:1px solid ${tag.border};color:${tag.color}">${tag.emoji} ${tag.label}</span>` : '';
+      const followupHtml = r.followup && !r.done ? `<span class="followup-badge">↩ follow-up</span>` : '';
 
       card.innerHTML = `
         <button class="check-btn" onclick="toggleDone('${r.id}')" aria-label="Complete">✓</button>
         <div class="card-body">
           <div class="card-title">${escHtml(r.title)}</div>
-          <div class="card-time ${overdue ? 'overdue-label' : ''}">
-            ${overdue ? '⚠ ' : ''}${formatTime(r.time)}
+          <div class="card-meta">
+            <span class="card-time ${overdue ? 'overdue-label' : ''}">${overdue ? '⚠ ' : ''}${formatTime(r.time)}</span>
+            ${tagHtml}${followupHtml}
           </div>
           ${!r.done ? `
           <div class="card-actions">
-            <button class="snooze-btn" onclick="openSnooze('${r.id}')">Snooze</button>
-            <button class="delete-btn" onclick="deleteReminder('${r.id}')">Remove</button>
+            <button class="action-btn" onclick="openSnooze('${r.id}')">Snooze</button>
+            <button class="action-btn" onclick="openEdit('${r.id}')">Edit</button>
+            <button class="action-btn danger" onclick="deleteReminder('${r.id}')">Remove</button>
           </div>` : `
           <div class="card-actions">
-            <button class="delete-btn" onclick="deleteReminder('${r.id}')">Remove</button>
+            <button class="action-btn danger" onclick="deleteReminder('${r.id}')">Remove</button>
           </div>`}
-        </div>
-      `;
+        </div>`;
       wrap.appendChild(card);
     });
 
@@ -700,25 +350,18 @@
     scheduleNotifications();
   }
 
-  function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
   // ── Actions ──
   function toggleDone(id) {
     const r = reminders.find(r => r.id === id);
     if (!r) return;
     r.done = !r.done;
-    save(reminders);
-    render();
+    save(reminders); render();
     toast(r.done ? 'Marked done ✓' : 'Moved back to pending');
   }
 
   function deleteReminder(id) {
     reminders = reminders.filter(r => r.id !== id);
-    save(reminders);
-    render();
-    toast('Removed');
+    save(reminders); render(); toast('Removed');
   }
 
   function setFilter(f, btn) {
@@ -728,43 +371,108 @@
     render();
   }
 
+  // ── Tag picker builder ──
+  function buildTagPicker(selectedId) {
+    const container = document.getElementById('add-tag-picker');
+    container.innerHTML = '';
+    const noneBtn = document.createElement('button');
+    noneBtn.className = 'tag-pick-btn' + (!selectedId ? ' selected' : '');
+    noneBtn.textContent = 'None';
+    noneBtn.onclick = () => { selectedTag = null; buildTagPicker(null); };
+    container.appendChild(noneBtn);
+    TAGS.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'tag-pick-btn' + (selectedId === t.id ? ' selected' : '');
+      btn.textContent = t.emoji + ' ' + t.label;
+      btn.onclick = () => { selectedTag = t.id; buildTagPicker(t.id); };
+      container.appendChild(btn);
+    });
+  }
+
+  // ── Follow-up toggle ──
+  function toggleFollowUp() {
+    addFollowUp = !addFollowUp;
+    document.getElementById('followup-switch').classList.toggle('on', addFollowUp);
+  }
+
   // ── Add ──
   function openAdd() {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getMinutes() % 5 + 5);
-    document.getElementById('add-time').value = toLocalISO(now);
+    editingId = null;
+    addFollowUp = false;
+    selectedTag = null;
+    document.getElementById('add-sheet-title').textContent = 'New reminder';
+    document.getElementById('add-submit-btn').textContent = 'Add to Ping';
     document.getElementById('add-title').value = '';
+    const now = new Date(); now.setMinutes(now.getMinutes() - now.getMinutes() % 5 + 5);
+    document.getElementById('add-time').value = toLocalISO(now);
+    document.getElementById('followup-switch').classList.remove('on');
+    buildTagPicker(null);
     document.getElementById('add-overlay').classList.add('open');
     setTimeout(() => document.getElementById('add-title').focus(), 300);
   }
 
-  function addReminder() {
+  // ── Edit ──
+  function openEdit(id) {
+    const r = reminders.find(r => r.id === id);
+    if (!r) return;
+    editingId = id;
+    addFollowUp = r.followup || false;
+    selectedTag = r.tag || null;
+    document.getElementById('add-sheet-title').textContent = 'Edit reminder';
+    document.getElementById('add-submit-btn').textContent = 'Save changes';
+    document.getElementById('add-title').value = r.title;
+    document.getElementById('add-time').value = r.time ? toLocalISO(new Date(r.time)) : '';
+    document.getElementById('followup-switch').classList.toggle('on', addFollowUp);
+    buildTagPicker(selectedTag);
+    document.getElementById('add-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('add-title').focus(), 300);
+  }
+
+  // ── Submit (add or edit) ──
+  function submitReminder() {
     const title = document.getElementById('add-title').value.trim();
     const time = document.getElementById('add-time').value;
     if (!title) { toast('Add a title first'); return; }
-    const r = { id: uid(), title, time: time ? new Date(time).toISOString() : null, done: false, created: new Date().toISOString() };
-    reminders.push(r);
+    if (editingId) {
+      const r = reminders.find(r => r.id === editingId);
+      if (r) { r.title = title; r.time = time ? new Date(time).toISOString() : null; r.tag = selectedTag; r.followup = addFollowUp; }
+      toast('Saved ✓');
+    } else {
+      reminders.push({ id: uid(), title, time: time ? new Date(time).toISOString() : null, tag: selectedTag, followup: addFollowUp, done: false, created: new Date().toISOString() });
+      toast('Reminder added');
+    }
     save(reminders);
     document.getElementById('add-overlay').classList.remove('open');
     render();
-    toast('Reminder added');
   }
 
   // ── Snooze ──
+  function getSnoozePresets() {
+    const now = new Date();
+    const tonight = new Date(now); tonight.setHours(21,30,0,0); if (tonight <= now) tonight.setDate(tonight.getDate()+1);
+    const tomorrow = new Date(now); tomorrow.setDate(now.getDate()+1); tomorrow.setHours(8,0,0,0);
+    const oneHour = new Date(now.getTime() + 60*60*1000);
+    const weekend = new Date(now); const daysUntilSat = now.getDay()===6?7:6-now.getDay(); weekend.setDate(now.getDate()+daysUntilSat); weekend.setHours(15,0,0,0);
+    return [
+      { label: 'In 1 hour',        time: oneHour,  display: formatTime(oneHour.toISOString()) },
+      { label: 'Tonight',          time: tonight,  display: formatTime(tonight.toISOString()) },
+      { label: 'Tomorrow morning', time: tomorrow, display: formatTime(tomorrow.toISOString()) },
+      { label: 'This weekend',     time: weekend,  display: formatTime(weekend.toISOString()) },
+    ];
+  }
+
   function openSnooze(id) {
     snoozeTargetId = id;
-    const presets = getSnoozePresets();
     const container = document.getElementById('snooze-options');
     container.innerHTML = '';
-    presets.forEach(p => {
+    getSnoozePresets().forEach(p => {
       const el = document.createElement('div');
       el.className = 'snooze-option';
       el.innerHTML = `<span class="snooze-option-label">${p.label}</span><span class="snooze-option-time">${p.display}</span>`;
       el.onclick = () => applySnooze(p.time.toISOString());
       container.appendChild(el);
     });
-    const now = new Date();
-    now.setHours(now.getHours() + 1, 0, 0, 0);
+    const now = new Date(); now.setHours(now.getHours()+1,0,0,0);
     document.getElementById('custom-snooze-time').value = toLocalISO(now);
     document.getElementById('snooze-overlay').classList.add('open');
   }
@@ -772,12 +480,10 @@
   function applySnooze(iso) {
     const r = reminders.find(r => r.id === snoozeTargetId);
     if (!r) return;
-    r.time = iso;
-    r.done = false;
+    r.time = iso; r.done = false;
     save(reminders);
     document.getElementById('snooze-overlay').classList.remove('open');
-    render();
-    toast('Snoozed until ' + formatTime(iso));
+    render(); toast('Snoozed until ' + formatTime(iso));
   }
 
   function applyCustomSnooze() {
@@ -787,22 +493,12 @@
   }
 
   // ── Overlay ──
-  function overlayClick(e, id) {
-    if (e.target === document.getElementById(id)) {
-      document.getElementById(id).classList.remove('open');
-    }
-  }
+  function overlayClick(e, id) { if (e.target === document.getElementById(id)) document.getElementById(id).classList.remove('open'); }
 
   // ── Notifications ──
   function updateNotifBar() {
     const bar = document.getElementById('notif-bar');
-    if (Notification.permission === 'granted') {
-      bar.classList.add('hidden');
-    } else if (Notification.permission === 'denied') {
-      bar.classList.add('hidden');
-    } else {
-      bar.classList.remove('hidden');
-    }
+    bar.classList.toggle('hidden', Notification.permission !== 'default');
   }
 
   function requestNotifPermission() {
@@ -813,7 +509,6 @@
   }
 
   let scheduledTimers = [];
-
   function scheduleNotifications() {
     scheduledTimers.forEach(t => clearTimeout(t));
     scheduledTimers = [];
@@ -821,43 +516,36 @@
     const now = Date.now();
     reminders.filter(r => !r.done && r.time).forEach(r => {
       const ms = new Date(r.time).getTime() - now;
-      if (ms > 0 && ms < 24 * 60 * 60 * 1000) {
-        const t = setTimeout(() => {
-          new Notification('Ping', { body: r.title, icon: '/icon-192.png', tag: r.id });
-        }, ms);
-        scheduledTimers.push(t);
+      if (ms > 0 && ms < 24*60*60*1000) {
+        scheduledTimers.push(setTimeout(() => new Notification('Ping', { body: r.title, tag: r.id }), ms));
       }
     });
+    // Tell service worker to schedule too
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_NOTIFICATIONS', reminders });
+    }
   }
 
-  // ── Util ──
-  function toLocalISO(d) {
-    const pad = n => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  // ── Service Worker ──
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg failed:', err));
   }
 
   // ── Keyboard ──
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
-    }
-    if (e.key === 'Enter' && document.getElementById('add-overlay').classList.contains('open')) {
-      addReminder();
-    }
+    if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+    if (e.key === 'Enter' && document.getElementById('add-overlay').classList.contains('open')) submitReminder();
   });
 
   // ── Init ──
+  renderTagFilters();
   render();
-  updateNotifBar();
 
-  // Seed demo reminder if empty
+  // Seed demo if empty
   if (reminders.length === 0) {
-    const demo = new Date();
-    demo.setDate(demo.getDate() + 1);
-    demo.setHours(8, 0, 0, 0);
-    reminders.push({ id: uid(), title: 'Submit PTO request', time: demo.toISOString(), done: false, created: new Date().toISOString() });
-    save(reminders);
-    render();
+    const demo = new Date(); demo.setDate(demo.getDate()+1); demo.setHours(8,0,0,0);
+    reminders.push({ id: uid(), title: 'Submit PTO request', time: demo.toISOString(), tag: 'inc', followup: false, done: false, created: new Date().toISOString() });
+    save(reminders); render();
   }
 </script>
 </body>
