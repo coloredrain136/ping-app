@@ -305,8 +305,35 @@
   function getTag(id) { return TAGS.find(t=>t.id===id)||null; }
 
   const STORAGE_KEY = 'ping_reminders';
+  const API = '/api/reminders';
+
   function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]; } catch { return []; } }
-  function save(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+  function save(d) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+    syncToServer(d);
+  }
+
+  async function syncToServer(data) {
+    try {
+      await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reminders: data })
+      });
+    } catch(e) { /* silent fail */ }
+  }
+
+  async function loadFromServer() {
+    try {
+      const res = await fetch(API);
+      const data = await res.json();
+      if (data.reminders && data.reminders.length > 0) {
+        reminders = data.reminders;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reminders));
+        render();
+      }
+    } catch(e) { /* use localStorage fallback */ }
+  }
 
   let reminders = load();
   let currentFilter = 'pending';
@@ -751,12 +778,7 @@
   buildFilterDrawer();
   buildDurationGrid();
   render();
-
-  if(reminders.length===0){
-    const demo=new Date(); demo.setDate(demo.getDate()+1); demo.setHours(8,0,0,0);
-    reminders.push({id:uid(),title:'Submit PTO request',time:demo.toISOString(),tag:'inc',followup:false,parentId:null,done:false,created:new Date().toISOString()});
-    save(reminders); render();
-  }
+  loadFromServer(); // sync from server on load
 </script>
 </body>
 </html>
