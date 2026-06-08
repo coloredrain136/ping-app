@@ -508,6 +508,22 @@
     scheduleNotifications();
   }
 
+  function buildSubtaskDots(r) {
+    const subs = r.subtasks || [];
+    if (subs.length === 0) return '';
+    const MAX_DOTS = 8;
+    const visible = subs.slice(0, MAX_DOTS);
+    const extra = subs.length > MAX_DOTS ? subs.length - MAX_DOTS : 0;
+    const doneCount = subs.filter(s=>s.done).length;
+    let html = '<div class="subtask-track">';
+    visible.forEach((s, i) => {
+      if (i > 0) html += `<div class="subtask-line${s.done&&visible[i-1]&&visible[i-1].done?' done':''}"></div>`;
+      html += `<div class="subtask-dot${s.done?' done':''}" title="${escHtml(s.text)}" onclick="event.stopPropagation();toggleSubtaskFromCard('${r.id}','${s.id}')"></div>`;
+    });
+    html += `</div><span class="subtask-count">${doneCount}/${subs.length}</span>`;
+    return '<div style="display:flex;align-items:center;gap:6px">' + html + '</div>';
+  }
+
   function buildCard(r, isChild) {
     const overdue=isOverdue(r);
     const tag=r.tag?getTag(r.tag):null;
@@ -520,16 +536,18 @@
     const stackHtml=!isChild&&kids.length>0?`<span class="stack-indicator">⛓ ${kids.length} linked</span>`:'';
     const parentR=r.parentId?reminders.find(p=>p.id===r.parentId):null;
     const parentHtml=parentR?`<div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:5px">↑ ${escHtml(parentR.title)}</div>`:'';
+    const dotsHtml=buildSubtaskDots(r);
 
     card.innerHTML=`
       <button class="check-btn" onclick="toggleDone('${r.id}')" aria-label="Complete">✓</button>
       <div class="card-body">
         ${parentHtml}
-        <div class="card-title" onclick="${r.done?'':'openEdit(\''+r.id+'\')'}">${escHtml(r.title)}</div>
+        <div class="card-title" onclick="${r.done?'':'openDetail(\''+r.id+'\')'}"> ${escHtml(r.title)}</div>
         <div class="card-meta">
-          <span class="card-time${overdue?' overdue-label':''}">${overdue?'⚠ ':''}${formatTime(r.time)}</span>
+          <span class="card-time${overdue?' overdue-label':''}"> ${overdue?'⚠ ':''}${formatTime(r.time)}</span>
           ${tagHtml}${fuHtml}${stackHtml}
         </div>
+        ${dotsHtml}
         ${!r.done?`
         <div class="card-actions">
           <button class="action-btn" onclick="openSnooze('${r.id}')">Snooze</button>
@@ -665,6 +683,99 @@
     render();
   }
 
+  // ── Detail view ──
+  let detailId = null;
+
+  function openDetail(id) {
+    const r = reminders.find(r=>r.id===id); if(!r)return;
+    detailId = id;
+    document.getElementById('detail-title').textContent = r.title;
+    renderDetailMeta(r);
+    renderSubtaskList(r);
+    document.getElementById('subtask-input').value = '';
+    document.getElementById('detail-overlay').classList.add('open');
+  }
+
+  function renderDetailMeta(r) {
+    const tag = r.tag ? getTag(r.tag) : null;
+    const tagHtml = tag ? `<span class="card-tag" style="background:${tag.bg};border:1px solid ${tag.border};color:${tag.color}">${tag.emoji} ${tag.label}</span>` : '';
+    const fuHtml = r.followup ? `<span class="followup-badge">↩ follow-up</span>` : '';
+    const overdue = isOverdue(r);
+    document.getElementById('detail-meta').innerHTML = `
+      <span class="detail-time-block${overdue?' overdue-label':''}">${overdue?'⚠ ':''}${formatTime(r.time)}</span>
+      ${tagHtml}${fuHtml}`;
+  }
+
+  function renderSubtaskList(r) {
+    const list = document.getElementById('detail-subtask-list');
+    list.innerHTML = '';
+    const subs = r.subtasks || [];
+    if (subs.length === 0) {
+      list.innerHTML = `<div style="font-family:'Geist Mono',monospace;font-size:12px;color:var(--text-muted);padding:8px 0">No subtasks yet</div>`;
+      return;
+    }
+    subs.forEach(s => {
+      const item = document.createElement('div');
+      item.className = `subtask-item${s.done?' done-item':''}`;
+      item.onclick = () => toggleSubtask(r.id, s.id);
+      item.innerHTML = `
+        <div class="subtask-check">✓</div>
+        <span class="subtask-item-text">${escHtml(s.text)}</span>
+        <button class="subtask-item-del" onclick="event.stopPropagation();deleteSubtask('${r.id}','${s.id}')">×</button>`;
+      list.appendChild(item);
+    });
+  }
+
+  function addSubtask() {
+    const input = document.getElementById('subtask-input');
+    const text = input.value.trim();
+    if (!text) return;
+    const r = reminders.find(r=>r.id===detailId); if(!r)return;
+    if (!r.subtasks) r.subtasks = [];
+    r.subtasks.push({ id: uid(), text, done: false });
+    save(reminders);
+    input.value = '';
+    renderSubtaskList(r);
+    render();
+    input.focus();
+  }
+
+  function toggleSubtask(remId, subId) {
+    const r = reminders.find(r=>r.id===remId); if(!r||!r.subtasks)return;
+    const s = r.subtasks.find(s=>s.id===subId); if(!s)return;
+    s.done = !s.done;
+    save(reminders);
+    renderSubtaskList(r);
+    render();
+  }
+
+  function toggleSubtaskFromCard(remId, subId) {
+    toggleSubtask(remId, subId);
+  }
+
+  function deleteSubtask(remId, subId) {
+    const r = reminders.find(r=>r.id===remId); if(!r||!r.subtasks)return;
+    r.subtasks = r.subtasks.filter(s=>s.id!==subId);
+    save(reminders);
+    renderSubtaskList(r);
+    render();
+  }
+
+  function openEditFromDetail() {
+    document.getElementById('detail-overlay').classList.remove('open');
+    setTimeout(() => openEdit(detailId), 200);
+  }
+
+  function openSnoozeFromDetail() {
+    document.getElementById('detail-overlay').classList.remove('open');
+    setTimeout(() => openSnooze(detailId), 200);
+  }
+
+  function deleteFromDetail() {
+    document.getElementById('detail-overlay').classList.remove('open');
+    deleteReminder(detailId);
+  }
+
   // ── Snooze ──
   function getSnoozePresets(){
     const now=new Date();
@@ -731,6 +842,7 @@
   }
 
   initSwipeDismiss('add-sheet','add-overlay');
+  initSwipeDismiss('detail-sheet','detail-overlay');
   initSwipeDismiss('snooze-sheet','snooze-overlay');
   initSwipeDismiss('schedule-sheet','schedule-overlay');
 
@@ -765,6 +877,10 @@
   }
 
   // ── Keyboard — only submit on Enter if submit button or no input focused ──
+  document.getElementById('subtask-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addSubtask(); }
+  });
+
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape') document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open'));
     if(e.key==='Enter'){
