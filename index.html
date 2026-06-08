@@ -538,11 +538,12 @@
     const parentHtml=parentR?`<div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:5px">↑ ${escHtml(parentR.title)}</div>`:'';
     const dotsHtml=buildSubtaskDots(r);
 
+    const titleClick = r.done ? '' : `openDetail('${r.id}')`;
     card.innerHTML=`
       <button class="check-btn" onclick="toggleDone('${r.id}')" aria-label="Complete">✓</button>
       <div class="card-body">
         ${parentHtml}
-        <div class="card-title" onclick="${r.done?'':'openDetail(\''+r.id+'\')'}"> ${escHtml(r.title)}</div>
+        <div class="card-title" onclick="${titleClick}">${escHtml(r.title)}</div>
         <div class="card-meta">
           <span class="card-time${overdue?' overdue-label':''}"> ${overdue?'⚠ ':''}${formatTime(r.time)}</span>
           ${tagHtml}${fuHtml}${stackHtml}
