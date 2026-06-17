@@ -234,6 +234,38 @@
       .tab { cursor: pointer; }
       .dot-node:hover { transform: scale(1.25); }
     }
+    /* ── Light theme ── */
+    html.light { --bg:#f6f6f7; --surface:#ffffff; --surface2:#eeeef1; --border:#e1e1e6; --text:#1b1b1f; --text-muted:#6c6c78; --text-dim:#45454f; }
+    html.light .ios-toggle { background:#d1d1d6; }
+    html.light select.field-input option { background:#fff; }
+
+    /* ── Settings ── */
+    #settings-btn { padding:6px 10px; font-size:15px; }
+    .set-group { margin-bottom:22px; }
+    .set-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid var(--border); }
+    .set-row:last-child { border-bottom:none; }
+    .set-row-main { flex:1; min-width:0; }
+    .set-row-label { font-size:15px; color:var(--text); }
+    .set-row-desc { font-size:12px; color:var(--text-muted); margin-top:2px; line-height:1.35; }
+    .seg { display:flex; background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:3px; gap:3px; }
+    .seg button { flex:1; padding:8px; border:none; background:transparent; color:var(--text-muted); font-family:'Geist Mono',monospace; font-size:12px; border-radius:8px; cursor:pointer; transition:all .15s ease; }
+    .seg button.active { background:var(--accent); color:#0f0f10; font-weight:600; }
+    .swatch-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:6px; }
+    .swatch { width:30px; height:30px; border-radius:50%; cursor:pointer; border:none; padding:0; transition:transform .1s ease; }
+    .swatch:active { transform:scale(0.88); }
+    .swatch.active { box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
+    .swatch-custom { width:32px; height:32px; border-radius:50%; border:1px dashed var(--text-muted); position:relative; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; }
+    .swatch-custom input { position:absolute; inset:-6px; opacity:0; cursor:pointer; }
+    .snz-list { display:flex; flex-direction:column; gap:10px; }
+    .snz-row { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:8px; }
+    .snz-top, .snz-detail { display:flex; gap:8px; align-items:center; }
+    .snz-row .field-input { margin-bottom:0; }
+    .snz-label-input { flex:1; }
+    .snz-remove { flex-shrink:0; width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--danger); cursor:pointer; font-size:18px; line-height:1; }
+    .snz-add { width:100%; padding:11px; border-radius:10px; border:1px dashed var(--accent-dim); background:transparent; color:var(--accent); font-family:'Geist Mono',monospace; font-size:12px; cursor:pointer; margin-top:10px; }
+    .link-btn { background:none; border:none; color:var(--text-muted); font-family:'Geist Mono',monospace; font-size:11px; cursor:pointer; padding:0; margin:-8px 0 14px; text-decoration:underline; }
+  </style>
+  <script>try{var s=JSON.parse(localStorage.getItem('ping_settings'));if(s){if(s.theme==='light')document.documentElement.classList.add('light');if(s.accent)document.documentElement.style.setProperty('--accent',s.accent);}}catch(e){}</script>
 </head>
 <body>
 <div id="app">
@@ -241,6 +273,7 @@
     <div class="wordmark">Pi<span>ng</span></div>
     <div class="header-right">
       <div class="header-meta" id="header-meta">0 pending</div>
+      <button class="filter-toggle-btn" id="settings-btn" onclick="openSettings()" aria-label="Settings" title="Settings">⚙</button>
       <button class="filter-toggle-btn" id="refresh-btn" onclick="refreshNow()" aria-label="Sync now" title="Sync now">↻</button>
       <button class="filter-toggle-btn" id="filter-btn" onclick="toggleFilterDrawer()">
         <div class="filter-dot"></div>Filter
@@ -313,6 +346,7 @@
     <input class="field-input" id="edit-title" type="text" maxlength="120" autocomplete="off" />
     <div class="field-label">Due date &amp; time <span style="text-transform:none;letter-spacing:0;color:var(--text-muted);opacity:0.7">— when it's due (optional)</span></div>
     <input class="field-input" id="edit-time" type="datetime-local" />
+    <button type="button" class="link-btn" onclick="document.getElementById('edit-time').value=''">Clear time</button>
     <div class="field-label">Tag</div>
     <div class="tag-picker" id="edit-tag-picker"></div>
     <div class="field-label">Link to another reminder</div>
@@ -377,6 +411,60 @@
   </div>
 </div>
 
+<!-- ── Settings ── -->
+<div class="overlay" id="settings-overlay" onclick="backdropClick(event,'settings-overlay')">
+  <div class="sheet">
+    <div class="sheet-title">Settings</div>
+
+    <div class="set-group">
+      <div class="field-label">Appearance</div>
+      <div class="set-row">
+        <div class="set-row-main"><div class="set-row-label">Light mode</div><div class="set-row-desc">Switch between dark and light</div></div>
+        <button class="ios-toggle" id="set-theme" onclick="toggleSetting('theme')"></button>
+      </div>
+      <div class="set-row" style="flex-direction:column; align-items:stretch">
+        <div class="set-row-main" style="margin-bottom:4px"><div class="set-row-label">Accent color</div></div>
+        <div class="swatch-row" id="swatch-row"></div>
+      </div>
+    </div>
+
+    <div class="set-group">
+      <div class="field-label">Behavior</div>
+      <div class="set-row" style="flex-direction:column; align-items:stretch; gap:10px">
+        <div class="set-row-main"><div class="set-row-label">Default tab</div><div class="set-row-desc">Which list opens first</div></div>
+        <div class="seg" id="seg-tab">
+          <button data-tab="all" onclick="setDefaultTab('all')">All</button>
+          <button data-tab="pending" onclick="setDefaultTab('pending')">Pending</button>
+        </div>
+      </div>
+      <div class="set-row">
+        <div class="set-row-main"><div class="set-row-label">AI suggestions</div><div class="set-row-desc">Show the ✨ suggest button</div></div>
+        <button class="ios-toggle" id="set-ai" onclick="toggleSetting('aiSuggest')"></button>
+      </div>
+      <div class="set-row">
+        <div class="set-row-main"><div class="set-row-label">Confirm before delete</div><div class="set-row-desc">Ask before removing a reminder</div></div>
+        <button class="ios-toggle" id="set-confirm" onclick="toggleSetting('confirmDelete')"></button>
+      </div>
+      <div class="set-row" style="flex-direction:column; align-items:stretch; gap:8px">
+        <div class="set-row-main"><div class="set-row-label">Default tag</div><div class="set-row-desc">Auto-tag new quick-capture items</div></div>
+        <select class="field-input" id="set-deftag" style="margin-bottom:0" onchange="setDefaultTag(this.value)"></select>
+      </div>
+      <div class="set-row">
+        <div class="set-row-main"><div class="set-row-label">Default time</div><div class="set-row-desc">Pre-fills this time when you date a reminder</div></div>
+        <input class="field-input" id="set-deftime" type="time" style="margin-bottom:0; width:auto" onchange="setDefaultTime(this.value)" />
+      </div>
+    </div>
+
+    <div class="set-group">
+      <div class="field-label">Snooze presets</div>
+      <div class="snz-list" id="snz-list"></div>
+      <button class="snz-add" onclick="addSnoozePreset()">+ Add preset</button>
+    </div>
+
+    <button class="submit-btn" onclick="closeOverlay('settings-overlay')">Done</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -391,6 +479,138 @@
     {id:'later',     label:'Later',      emoji:'💤', bg:'rgba(148,163,184,0.12)', border:'rgba(148,163,184,0.35)', color:'#94a3b8'},
   ];
   const getTag = id => TAGS.find(t=>t.id===id)||null;
+
+  // ── Settings ──
+  const SETTINGS_KEY = 'ping_settings';
+  const SETTINGS_API = '/api/settings';
+  const ACCENT_PRESETS = ['#6ee7b7','#5b9cf6','#a78bfa','#fbbf24','#fb7185','#2dd4bf','#f472b6','#34d399'];
+  const DEFAULT_SETTINGS = {
+    theme:'dark', accent:'#6ee7b7', defaultTab:'all', aiSuggest:true, confirmDelete:true,
+    defaultTag:null, defaultTime:'09:00',
+    snoozePresets:[
+      {label:'In 1 hour', mode:'in', minutes:60},
+      {label:'Tonight', mode:'today', time:'21:30'},
+      {label:'Tomorrow morning', mode:'tomorrow', time:'08:00'},
+      {label:'This weekend', mode:'dow', dow:6, time:'15:00'}
+    ],
+    updated:0
+  };
+  let settings = {...DEFAULT_SETTINGS};
+
+  function loadSettings(){
+    try { const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)); if(s&&typeof s==='object') settings={...DEFAULT_SETTINGS, ...s}; } catch {}
+  }
+  function saveSettings(){
+    settings.updated=Date.now();
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    syncSettingsServer();
+  }
+  async function syncSettingsServer(){
+    try { await fetch(SETTINGS_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({settings})}); } catch {}
+  }
+  async function syncSettingsFromServer(){
+    try {
+      const res=await fetch(SETTINGS_API); const data=await res.json();
+      const remote=data&&data.settings;
+      if(remote&&typeof remote==='object'&&(remote.updated||0)>(settings.updated||0)){
+        settings={...DEFAULT_SETTINGS, ...remote};
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        applySettings();
+        currentFilter=settings.defaultTab||'all';
+        syncActiveTab(); render();
+      } else { syncSettingsServer(); }
+    } catch {}
+  }
+
+  function hexToRgb(hex){ hex=(hex||'').replace('#',''); if(hex.length===3)hex=hex.split('').map(c=>c+c).join(''); const n=parseInt(hex,16); return {r:(n>>16)&255,g:(n>>8)&255,b:n&255}; }
+  function hexToRgba(hex,a){ const {r,g,b}=hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+  function shade(hex,amt){ let {r,g,b}=hexToRgb(hex); const f=v=>Math.max(0,Math.min(255,Math.round(v*(1+amt)))); return `rgb(${f(r)},${f(g)},${f(b)})`; }
+
+  function applyAccent(hex){
+    const root=document.documentElement;
+    root.style.setProperty('--accent', hex);
+    root.style.setProperty('--accent-dim', shade(hex,-0.5));
+    root.style.setProperty('--accent-glow', hexToRgba(hex,0.12));
+  }
+  function applySettings(){
+    document.documentElement.classList.toggle('light', settings.theme==='light');
+    const tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.setAttribute('content', settings.theme==='light'?'#f6f6f7':'#0f0f10');
+    applyAccent(settings.accent||'#6ee7b7');
+    const aw=document.querySelector('.ai-suggest-wrap'); if(aw) aw.style.display = settings.aiSuggest?'':'none';
+  }
+  function syncActiveTab(){
+    document.querySelectorAll('.tabs .tab').forEach(t=>{
+      const oc=t.getAttribute('onclick')||'';
+      t.classList.toggle('active', oc.includes("'"+currentFilter+"'"));
+    });
+  }
+
+  function openSettings(){ renderSettingsUI(); document.getElementById('settings-overlay').classList.add('open'); }
+  function toggleSetting(key){ settings[key]=!settings[key]; saveSettings(); applySettings(); renderSettingsUI(); }
+  function setDefaultTab(t){ settings.defaultTab=t; saveSettings(); renderSettingsUI(); }
+  function setDefaultTag(v){ settings.defaultTag=v||null; saveSettings(); }
+  function setDefaultTime(v){ settings.defaultTime=v||'09:00'; saveSettings(); }
+  function setAccent(hex){ settings.accent=hex; saveSettings(); applySettings(); renderSettingsUI(); }
+
+  function renderSettingsUI(){
+    document.getElementById('set-theme').classList.toggle('on', settings.theme==='light');
+    document.getElementById('set-ai').classList.toggle('on', !!settings.aiSuggest);
+    document.getElementById('set-confirm').classList.toggle('on', !!settings.confirmDelete);
+    document.querySelectorAll('#seg-tab button').forEach(b=>b.classList.toggle('active', b.dataset.tab===settings.defaultTab));
+    document.getElementById('set-deftime').value=settings.defaultTime||'09:00';
+    const sel=document.getElementById('set-deftag'); sel.innerHTML='<option value="">None</option>';
+    TAGS.forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent=`${t.emoji} ${t.label}`; if(settings.defaultTag===t.id)o.selected=true; sel.appendChild(o); });
+    const sr=document.getElementById('swatch-row'); sr.innerHTML='';
+    ACCENT_PRESETS.forEach(hex=>{ const s=document.createElement('button'); s.className='swatch'+((settings.accent||'').toLowerCase()===hex.toLowerCase()?' active':''); s.style.background=hex; s.addEventListener('click',()=>setAccent(hex)); sr.appendChild(s); });
+    const custom=document.createElement('label'); custom.className='swatch-custom'; custom.textContent='🎨';
+    const ci=document.createElement('input'); ci.type='color'; ci.value=settings.accent||'#6ee7b7'; ci.addEventListener('input',()=>setAccent(ci.value)); custom.appendChild(ci); sr.appendChild(custom);
+    renderSnoozeEditor();
+  }
+
+  function renderSnoozeEditor(){
+    const list=document.getElementById('snz-list'); list.innerHTML='';
+    settings.snoozePresets.forEach((p,i)=>{
+      const row=document.createElement('div'); row.className='snz-row';
+      const top=document.createElement('div'); top.className='snz-top';
+      const label=document.createElement('input'); label.className='field-input snz-label-input'; label.value=p.label||''; label.placeholder='Label';
+      label.addEventListener('change',()=>{ settings.snoozePresets[i].label=label.value; saveSettings(); });
+      const rm=document.createElement('button'); rm.className='snz-remove'; rm.textContent='×';
+      rm.addEventListener('click',()=>{ settings.snoozePresets.splice(i,1); saveSettings(); renderSnoozeEditor(); });
+      top.appendChild(label); top.appendChild(rm);
+      const detail=document.createElement('div'); detail.className='snz-detail';
+      const mode=document.createElement('select'); mode.className='field-input';
+      [['in','In … minutes'],['today','Today at'],['tomorrow','Tomorrow at'],['dow','Day of week']].forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; if(p.mode===v)o.selected=true; mode.appendChild(o); });
+      mode.addEventListener('change',()=>{ const np=settings.snoozePresets[i]; np.mode=mode.value; if(np.mode==='in'&&np.minutes==null)np.minutes=60; if(np.mode!=='in'&&!np.time)np.time='09:00'; if(np.mode==='dow'&&np.dow==null)np.dow=6; saveSettings(); renderSnoozeEditor(); });
+      detail.appendChild(mode);
+      if(p.mode==='in'){
+        const num=document.createElement('input'); num.className='field-input'; num.type='number'; num.min='1'; num.value=p.minutes||60; num.style.width='90px';
+        num.addEventListener('change',()=>{ settings.snoozePresets[i].minutes=parseInt(num.value,10)||60; saveSettings(); });
+        detail.appendChild(num);
+      } else {
+        if(p.mode==='dow'){
+          const dow=document.createElement('select'); dow.className='field-input';
+          ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((d,di)=>{ const o=document.createElement('option'); o.value=di; o.textContent=d; if((p.dow!=null?p.dow:6)===di)o.selected=true; dow.appendChild(o); });
+          dow.addEventListener('change',()=>{ settings.snoozePresets[i].dow=parseInt(dow.value,10); saveSettings(); });
+          detail.appendChild(dow);
+        }
+        const time=document.createElement('input'); time.className='field-input'; time.type='time'; time.value=p.time||'09:00';
+        time.addEventListener('change',()=>{ settings.snoozePresets[i].time=time.value; saveSettings(); });
+        detail.appendChild(time);
+      }
+      row.appendChild(top); row.appendChild(detail); list.appendChild(row);
+    });
+  }
+  function addSnoozePreset(){ settings.snoozePresets.push({label:'New preset', mode:'in', minutes:30}); saveSettings(); renderSnoozeEditor(); }
+  function computeSnoozeTime(p){
+    const now=new Date();
+    if(p.mode==='in') return new Date(now.getTime()+(p.minutes||60)*60000);
+    const [hh,mm]=(p.time||'09:00').split(':').map(n=>parseInt(n,10));
+    if(p.mode==='today'){ const d=new Date(now); d.setHours(hh,mm,0,0); if(d<=now)d.setDate(d.getDate()+1); return d; }
+    if(p.mode==='tomorrow'){ const d=new Date(now); d.setDate(d.getDate()+1); d.setHours(hh,mm,0,0); return d; }
+    if(p.mode==='dow'){ const d=new Date(now); d.setHours(hh,mm,0,0); const target=p.dow!=null?p.dow:6; let add=(target-now.getDay()+7)%7; if(add===0&&d<=now)add=7; d.setDate(now.getDate()+add); return d; }
+    return new Date(now.getTime()+3600000);
+  }
+  function defaultDatedISO(){ const [hh,mm]=(settings.defaultTime||'09:00').split(':').map(n=>parseInt(n,10)); const d=new Date(); d.setHours(hh,mm,0,0); return toISO(d); }
 
   // ── Storage ──
   const KEY = 'ping_reminders';
@@ -493,7 +713,7 @@
     const input = document.getElementById('capture-input');
     const title = input.value.trim();
     if (!title) return;
-    reminders.push({id:uid(),title,time:null,tag:null,followup:false,parentId:null,subtasks:[],done:false,created:new Date().toISOString(),updated:Date.now()});
+    reminders.push({id:uid(),title,time:null,tag:settings.defaultTag||null,followup:false,parentId:null,subtasks:[],done:false,created:new Date().toISOString(),updated:Date.now()});
     save(reminders);
     input.value='';
     render();
@@ -664,10 +884,12 @@
   }
 
   function deleteReminder(id) {
+    if(settings.confirmDelete && !confirm('Remove this reminder?')) return false;
     reminders.forEach(r=>{ if(r.parentId===id){r.parentId=null; r.updated=Date.now();} });
     const r=reminders.find(r=>r.id===id);
     if(r){ r.deleted=true; r.done=true; r.updated=Date.now(); }
     save(reminders); render(); toast('Removed');
+    return true;
   }
 
   function setFilter(f,btn) {
@@ -725,7 +947,7 @@
     const btns=[
       {label:'Snooze', fn:()=>{ closeOverlay('detail-overlay'); setTimeout(()=>openSnooze(r.id),200); }},
       ...(r.time?[{label:'📅 Schedule', cls:'gcal', fn:()=>{ closeOverlay('detail-overlay'); setTimeout(()=>openSchedule(r.id),200); }}]:[]),
-      {label:'Remove', cls:'danger', fn:()=>{ closeOverlay('detail-overlay'); deleteReminder(r.id); }},
+      {label:'Remove', cls:'danger', fn:()=>{ if(deleteReminder(r.id)) closeOverlay('detail-overlay'); }},
     ];
     btns.forEach(b=>{
       const btn=document.createElement('button');
@@ -839,7 +1061,7 @@
     document.getElementById('edit-sheet-title').textContent='Edit reminder';
     document.getElementById('edit-submit-btn').textContent='Save changes';
     document.getElementById('edit-title').value=r.title;
-    document.getElementById('edit-time').value=r.time?toISO(new Date(r.time)):'';
+    document.getElementById('edit-time').value=r.time?toISO(new Date(r.time)):defaultDatedISO();
     document.getElementById('followup-switch').classList.toggle('on',editFollowUp);
     document.getElementById('followup-date-row').classList.toggle('visible',editFollowUp);
     buildTagPicker(editSelectedTag);
@@ -887,12 +1109,7 @@
 
   // ── Snooze ──
   function getSnoozePresets() {
-    const now=new Date();
-    const tonight=new Date(now); tonight.setHours(21,30,0,0); if(tonight<=now)tonight.setDate(tonight.getDate()+1);
-    const tomorrow=new Date(now); tomorrow.setDate(now.getDate()+1); tomorrow.setHours(8,0,0,0);
-    const oneHour=new Date(now.getTime()+60*60*1000);
-    const weekend=new Date(now); const dsu=now.getDay()===6?7:6-now.getDay(); weekend.setDate(now.getDate()+dsu); weekend.setHours(15,0,0,0);
-    return [{label:'In 1 hour',time:oneHour},{label:'Tonight',time:tonight},{label:'Tomorrow morning',time:tomorrow},{label:'This weekend',time:weekend}];
+    return settings.snoozePresets.map(p=>({label:p.label, time:computeSnoozeTime(p)}));
   }
 
   function openSnooze(id) {
@@ -1003,10 +1220,15 @@
   document.addEventListener('keydown',e=>{ if(e.key==='Escape')document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open')); });
 
   // ── Init ──
+  loadSettings();
+  applySettings();
+  currentFilter = settings.defaultTab || 'all';
   buildFilterDrawer();
   buildDurationGrid();
+  syncActiveTab();
   render();
   syncWithServer();
+  syncSettingsFromServer();
 </script>
 </body>
 </html>
