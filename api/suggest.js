@@ -1,4 +1,4 @@
-// Ping — AI smart-capture route (Google Gemini, free tier)
+=// Ping — AI smart-capture route (Google Gemini, free tier)
 // Takes a raw reminder note and returns a cleaner title, optional subtasks, and an optional note.
 // The API key stays server-side (Vercel env var) and is never exposed to the browser.
 
@@ -22,6 +22,7 @@ export default async function handler(req, res) {
       'You help tidy up a quick personal reminder note.',
       'Given the raw note below, return:',
       '- title: a clear, concise, actionable version (imperative voice, ideally under 8 words, no trailing punctuation). If the note is already clean, return it mostly as-is.',
+      '  Capitalize the title in Title Case: capitalize the first word, the last word, and all major words. Keep minor words lowercase (a, an, the, and, but, or, nor, for, to, of, in, on, at, by, up, as, vs, via) UNLESS they are the first or last word. Example: "discuss diploma payment with parents" -> "Discuss Diploma Payment with Parents".',
       '- subtasks: 2 to 6 short concrete steps, ONLY if the note clearly implies multiple steps. If it is a simple one-off, return an empty array. Do not invent busywork.',
       '- note: one short line of useful context ONLY if it genuinely helps. Otherwise an empty string.',
       'Keep everything brief and practical.',
