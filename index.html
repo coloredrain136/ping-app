@@ -115,7 +115,7 @@
     .dot-tracker { display: flex; align-items: center; gap: 0; margin-top: 10px; }
     .dot-line { flex: 1; height: 2px; background: var(--border); transition: background 0.3s ease; min-width: 6px; }
     .dot-line.filled { background: var(--accent-dim); }
-    .dot-node { width: 11px; height: 11px; border-radius: 50%; border: 2px solid rgba(110,231,183,0.5); background: var(--bg); flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .dot-node { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--accent); background: rgba(110,231,183,0.15); flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; -webkit-tap-highlight-color: transparent; }
     .dot-node.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110,231,183,0.2); }
     .dot-count { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--text-muted); margin-left: 8px; flex-shrink: 0; }
 
@@ -264,6 +264,13 @@
     .snz-remove { flex-shrink:0; width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--danger); cursor:pointer; font-size:18px; line-height:1; }
     .snz-add { width:100%; padding:11px; border-radius:10px; border:1px dashed var(--accent-dim); background:transparent; color:var(--accent); font-family:'Geist Mono',monospace; font-size:12px; cursor:pointer; margin-top:10px; }
     .link-btn { background:none; border:none; color:var(--text-muted); font-family:'Geist Mono',monospace; font-size:11px; cursor:pointer; padding:0; margin:-8px 0 14px; text-decoration:underline; }
+    .sched-agenda { margin: 4px 0 16px; }
+    .agenda-head { font-family:'Geist Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); margin-bottom:8px; }
+    .agenda-list { display:flex; flex-direction:column; gap:6px; max-height:168px; overflow-y:auto; }
+    .agenda-item { display:flex; gap:10px; padding:8px 11px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; font-size:13px; align-items:baseline; }
+    .agenda-time { font-family:'Geist Mono',monospace; font-size:11px; color:var(--accent); white-space:nowrap; flex-shrink:0; min-width:112px; }
+    .agenda-title { color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .agenda-empty { font-size:13px; color:var(--text-muted); padding:4px 0; }
   </style>
   <script>try{var s=JSON.parse(localStorage.getItem('ping_settings'));if(s){if(s.theme==='light')document.documentElement.classList.add('light');if(s.accent)document.documentElement.style.setProperty('--accent',s.accent);}}catch(e){}</script>
 </head>
@@ -387,7 +394,8 @@
     <div class="sheet-handle"></div>
     <div class="sheet-title">Schedule it</div>
     <div class="field-label">Date &amp; Start time</div>
-    <input class="field-input" id="sched-datetime" type="datetime-local" />
+    <input class="field-input" id="sched-datetime" type="datetime-local" onchange="loadDayAgenda()" />
+    <div class="sched-agenda" id="sched-agenda"></div>
     <div class="field-label">Duration</div>
     <div class="duration-grid" id="duration-grid"></div>
     <div class="sheet-divider"></div>
@@ -1159,7 +1167,39 @@
     document.getElementById('travel-options').style.display='none';
     buildDurationGrid();
     document.getElementById('schedule-overlay').classList.add('open');
+    loadDayAgenda();
   }
+
+  // ── Calendar availability (Google iCal) ──
+  async function loadDayAgenda() {
+    const box=document.getElementById('sched-agenda');
+    const val=document.getElementById('sched-datetime').value;
+    if(!val){ box.innerHTML=''; return; }
+    const date=val.slice(0,10);
+    box.innerHTML='<div class="agenda-empty">Loading your calendar…</div>';
+    try {
+      const res=await fetch('/api/calendar?date='+date);
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||'failed');
+      renderAgenda(data.events||[], date);
+    } catch(e) {
+      box.innerHTML='<div class="agenda-empty">Couldn’t load calendar</div>';
+    }
+  }
+  function renderAgenda(events, date) {
+    const box=document.getElementById('sched-agenda');
+    const d=new Date(date+'T00:00:00');
+    const label=d.toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});
+    if(!events.length){ box.innerHTML=`<div class="agenda-head">${label} · on your calendar</div><div class="agenda-empty">Nothing scheduled — wide open 🎉</div>`; return; }
+    let html=`<div class="agenda-head">${label} · on your calendar</div><div class="agenda-list">`;
+    events.forEach(ev=>{
+      const t=ev.allDay?'All day':`${fmtClock(ev.start)} – ${fmtClock(ev.end)}`;
+      html+=`<div class="agenda-item"><span class="agenda-time">${t}</span><span class="agenda-title">${esc(ev.summary||'(busy)')}</span></div>`;
+    });
+    html+='</div>';
+    box.innerHTML=html;
+  }
+  function fmtClock(iso){ return new Date(iso).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}); }
 
   function submitSchedule() {
     const r=reminders.find(r=>r.id===scheduleTargetId); if(!r)return;
