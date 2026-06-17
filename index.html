@@ -30,6 +30,9 @@
     .header-meta { font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--text-muted); }
     .filter-toggle-btn { background: transparent; border: 1px solid var(--border); border-radius: 100px; padding: 6px 14px; font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.15s ease; }
     .filter-toggle-btn.active { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+    #refresh-btn { padding: 6px 11px; font-size: 14px; }
+    #refresh-btn.spinning { animation: spin 0.6s linear; color: var(--accent); border-color: var(--accent-dim); }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .filter-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: none; flex-shrink: 0; }
     .filter-toggle-btn.filtered .filter-dot { display: block; }
 
@@ -88,6 +91,7 @@
 
     .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .card-time { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text-muted); }
+    .card-sched { font-family: 'Geist Mono', monospace; font-size: 11px; color: #5b9cf6; background: rgba(91,156,246,0.1); border: 1px solid rgba(91,156,246,0.25); border-radius: 100px; padding: 2px 8px; }
     .card-time.overdue-label { color: var(--danger); }
     .card-tag { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
     .followup-badge { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--warn); }
@@ -200,6 +204,7 @@
     <div class="wordmark">Pi<span>ng</span></div>
     <div class="header-right">
       <div class="header-meta" id="header-meta">0 pending</div>
+      <button class="filter-toggle-btn" id="refresh-btn" onclick="refreshNow()" aria-label="Sync now" title="Sync now">↻</button>
       <button class="filter-toggle-btn" id="filter-btn" onclick="toggleFilterDrawer()">
         <div class="filter-dot"></div>Filter
       </button>
@@ -223,9 +228,9 @@
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="setFilter('pending',this)">Pending</button>
+    <button class="tab active" onclick="setFilter('all',this)">All</button>
+    <button class="tab" onclick="setFilter('pending',this)">Pending</button>
     <button class="tab" onclick="setFilter('followup',this)">Follow-up</button>
-    <button class="tab" onclick="setFilter('all',this)">All</button>
     <button class="tab" onclick="setFilter('done',this)">Done</button>
   </div>
 
@@ -265,7 +270,7 @@
     <div class="sheet-title" id="edit-sheet-title">Edit reminder</div>
     <div class="field-label">Title</div>
     <input class="field-input" id="edit-title" type="text" maxlength="120" autocomplete="off" />
-    <div class="field-label">Date &amp; Time</div>
+    <div class="field-label">Due date &amp; time <span style="text-transform:none;letter-spacing:0;color:var(--text-muted);opacity:0.7">— when it's due (optional)</span></div>
     <input class="field-input" id="edit-time" type="datetime-local" />
     <div class="field-label">Tag</div>
     <div class="tag-picker" id="edit-tag-picker"></div>
@@ -385,10 +390,16 @@
       syncServer(merged);
     } catch {}
   }
+  async function refreshNow() {
+    const btn=document.getElementById('refresh-btn');
+    if(btn){ btn.classList.remove('spinning'); void btn.offsetWidth; btn.classList.add('spinning'); }
+    await syncWithServer();
+    toast('Synced ✓');
+  }
 
   // ── State ──
   let reminders = load();
-  let currentFilter = 'pending';
+  let currentFilter = 'all';
   let activeTagFilter = null;
   let filterOpen = false;
   let detailId = null;
@@ -420,6 +431,14 @@
     if (d.toDateString()===now.toDateString()) return `Today ${ts}`;
     if (d.toDateString()===tom.toDateString()) return `Tomorrow ${ts}`;
     return d.toLocaleDateString([],{month:'short',day:'numeric'})+' '+ts;
+  }
+
+  function fmtSched(iso) {
+    if (!iso) return '';
+    const d=new Date(iso);
+    const day=d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+    const ts=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+    return `${day} · ${ts}`;
   }
 
   function toast(msg) {
@@ -492,10 +511,12 @@
     if(topLevel.length===0){ empty.style.display='flex'; return; }
     empty.style.display='none';
 
-    // Split into due soon vs anytime (only in pending/all view)
+    // Split into due soon vs anytime (pending/all). In All view, done items drop to a Done section at the bottom.
     const showSections = (currentFilter==='pending'||currentFilter==='all') && !activeTagFilter;
-    const dueSoon = showSections ? topLevel.filter(r=>r.time) : [];
-    const anytime = showSections ? topLevel.filter(r=>!r.time) : topLevel;
+    const pendingTop = showSections ? topLevel.filter(r=>!r.done) : topLevel;
+    const doneTop = (currentFilter==='all' && !activeTagFilter) ? topLevel.filter(r=>r.done) : [];
+    const dueSoon = showSections ? pendingTop.filter(r=>r.time) : [];
+    const anytime = showSections ? pendingTop.filter(r=>!r.time) : pendingTop;
 
     if (showSections && dueSoon.length>0) {
       const h=document.createElement('div'); h.className='section-header'; h.textContent='Due soon';
@@ -509,6 +530,11 @@
     }
     if (!showSections) {
       topLevel.forEach(r=>{ wrap.appendChild(buildCard(r,false)); appendChildren(wrap,r,filtered); });
+    }
+    if (doneTop.length>0) {
+      const h=document.createElement('div'); h.className='section-header'; h.textContent='Done';
+      wrap.appendChild(h);
+      doneTop.forEach(r=>{ wrap.appendChild(buildCard(r,false)); appendChildren(wrap,r,filtered); });
     }
 
     updateNotifBar();
@@ -558,6 +584,7 @@
     const parentHtml=parentR?`<div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--text-muted);margin-bottom:4px">↑ ${esc(parentR.title)}</div>`:'';
     const dotsHtml=buildDotTracker(r);
     const timeHtml=r.time?`<span class="card-time${overdue?' overdue-label':''}">${overdue?'⚠ ':''}${fmtTime(r.time)}</span>`:'';
+    const schedHtml=r.scheduledFor?`<span class="card-sched">📅 ${fmtSched(r.scheduledFor)}</span>`:'';
 
     // Safe onclick using data attribute
     card.innerHTML=`
@@ -565,13 +592,14 @@
       <div class="card-body">
         ${parentHtml}
         <div class="card-title">${esc(r.title)}</div>
-        <div class="card-meta">${timeHtml}${tagHtml}${fuHtml}${stackHtml}</div>
+        <div class="card-meta">${timeHtml}${schedHtml}${tagHtml}${fuHtml}${stackHtml}</div>
         ${dotsHtml}
         ${!r.done?`
         <div class="card-actions">
+          <button class="action-btn edit-card-btn">Edit</button>
+          <button class="action-btn gcal sched-card-btn">📅 Schedule</button>
           <button class="action-btn snooze-card-btn">Snooze</button>
           <button class="action-btn danger del-card-btn">Remove</button>
-          ${r.time?`<button class="action-btn gcal sched-card-btn">📅 Schedule</button>`:''}
         </div>`:`
         <div class="card-actions"><button class="action-btn danger del-card-btn">Remove</button></div>`}
       </div>`;
@@ -582,6 +610,7 @@
     const sb=card.querySelector('.snooze-card-btn'); if(sb) sb.addEventListener('click',e=>{ e.stopPropagation(); openSnooze(r.id); });
     const db=card.querySelector('.del-card-btn'); if(db) db.addEventListener('click',e=>{ e.stopPropagation(); deleteReminder(r.id); });
     const gb=card.querySelector('.sched-card-btn'); if(gb) gb.addEventListener('click',e=>{ e.stopPropagation(); openSchedule(r.id); });
+    const eb=card.querySelector('.edit-card-btn'); if(eb) eb.addEventListener('click',e=>{ e.stopPropagation(); openEdit(r.id); });
 
     return card;
   }
@@ -624,7 +653,8 @@
     const tagHtml=tag?`<span class="card-tag" style="background:${tag.bg};border:1px solid ${tag.border};color:${tag.color}">${tag.emoji} ${tag.label}</span>`:'';
     const fuHtml=r.followup?`<span class="followup-badge">↩ follow-up</span>`:'';
     const timeHtml=r.time?`<span class="detail-time${overdue?' overdue':''}">${overdue?'⚠ ':''}${fmtTime(r.time)}</span>`:`<span class="detail-time">No time set</span>`;
-    document.getElementById('detail-meta').innerHTML=timeHtml+tagHtml+fuHtml;
+    const schedHtml=r.scheduledFor?`<span class="card-sched">📅 ${fmtSched(r.scheduledFor)}</span>`:'';
+    document.getElementById('detail-meta').innerHTML=timeHtml+schedHtml+tagHtml+fuHtml;
   }
 
   function renderSubtasks(r) {
@@ -817,8 +847,13 @@
     if(selectedDuration===0){ const ds=start.toISOString().slice(0,10).replace(/-/g,''); dates=`${ds}/${ds}`; }
     else { const end=new Date(start.getTime()+selectedDuration*60*1000); dates=`${fmt(actualStart)}/${fmt(end)}`; }
     const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(r.title)}&dates=${dates}&details=${encodeURIComponent(travelMins>0?`Travel buffer: ${travelMins} min\nAdded from Ping`:'Added from Ping')}`;
+    // Remember what we scheduled so it shows on the card/detail without opening Google Calendar.
+    r.scheduledFor=start.toISOString();
+    r.scheduledDuration=selectedDuration;
+    r.updated=Date.now();
+    save(reminders); render();
     window.open(url,'_blank');
-    closeOverlay('schedule-overlay'); toast('Opened in Google Calendar');
+    closeOverlay('schedule-overlay'); toast('Scheduled · opened in Google Calendar');
   }
 
   // ── Overlay helpers ──
