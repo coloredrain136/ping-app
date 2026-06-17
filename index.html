@@ -349,20 +349,40 @@
   // ── Storage ──
   const KEY = 'ping_reminders';
   const API = '/api/reminders';
-  function load() { try { return JSON.parse(localStorage.getItem(KEY))||[]; } catch { return []; } }
+  function load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(KEY)) || [];
+      // Backfill `updated` for reminders created before sync existed.
+      d.forEach(r => { if (r && r.updated == null) r.updated = r.created ? new Date(r.created).getTime() : Date.now(); });
+      return d;
+    } catch { return []; }
+  }
   function save(d) { localStorage.setItem(KEY,JSON.stringify(d)); syncServer(d); }
   async function syncServer(data) {
     try { await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reminders:data})}); } catch {}
   }
-  async function loadFromServer() {
+  // Merge two reminder lists by id, keeping the most-recently-updated version of each.
+  // This is what lets iPhone / iPad / desktop converge instead of clobbering each other.
+  function mergeReminders(local, remote) {
+    const map = {};
+    for (const r of [...remote, ...local]) {
+      if (!r || !r.id) continue;
+      const ex = map[r.id];
+      if (!ex || (r.updated || 0) >= (ex.updated || 0)) map[r.id] = r;
+    }
+    return Object.values(map);
+  }
+  async function syncWithServer() {
     try {
       const res = await fetch(API);
       const data = await res.json();
-      if (data.reminders && data.reminders.length > 0) {
-        reminders = data.reminders;
-        localStorage.setItem(KEY, JSON.stringify(reminders));
-        render();
-      }
+      const remote = Array.isArray(data.reminders) ? data.reminders : [];
+      const merged = mergeReminders(reminders, remote);
+      reminders = merged;
+      localStorage.setItem(KEY, JSON.stringify(merged));
+      render();
+      // Push the merged union back up so the server reflects this device's items too.
+      syncServer(merged);
     } catch {}
   }
 
@@ -390,7 +410,7 @@
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function toISO(d) { const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
   function isOverdue(r) { return !!(r.time&&!r.done&&new Date(r.time)<new Date()); }
-  function getChildren(pid) { return reminders.filter(r=>r.parentId===pid); }
+  function getChildren(pid) { return reminders.filter(r=>r.parentId===pid&&!r.deleted); }
 
   function fmtTime(iso) {
     if (!iso) return '';
@@ -413,7 +433,7 @@
     const input = document.getElementById('capture-input');
     const title = input.value.trim();
     if (!title) return;
-    reminders.push({id:uid(),title,time:null,tag:null,followup:false,parentId:null,subtasks:[],done:false,created:new Date().toISOString()});
+    reminders.push({id:uid(),title,time:null,tag:null,followup:false,parentId:null,subtasks:[],done:false,created:new Date().toISOString(),updated:Date.now()});
     save(reminders);
     input.value='';
     render();
@@ -453,10 +473,10 @@
   function render() {
     const wrap=document.getElementById('list-wrap');
     const empty=document.getElementById('empty-state');
-    const pending=reminders.filter(r=>!r.done).length;
+    const pending=reminders.filter(r=>!r.done&&!r.deleted).length;
     document.getElementById('header-meta').textContent=pending===0?'all clear':`${pending} pending`;
 
-    let filtered=[...reminders].sort((a,b)=>{
+    let filtered=[...reminders].filter(r=>!r.deleted).sort((a,b)=>{
       if(!a.time&&!b.time) return new Date(b.created)-new Date(a.created);
       if(!a.time) return 1; if(!b.time) return -1;
       return new Date(a.time)-new Date(b.time);
@@ -569,13 +589,14 @@
   // ── Actions ──
   function toggleDone(id) {
     const r=reminders.find(r=>r.id===id); if(!r)return;
-    r.done=!r.done; save(reminders); render();
+    r.done=!r.done; r.updated=Date.now(); save(reminders); render();
     toast(r.done?'Done ✓':'Back to pending');
   }
 
   function deleteReminder(id) {
-    reminders.forEach(r=>{ if(r.parentId===id)r.parentId=null; });
-    reminders=reminders.filter(r=>r.id!==id);
+    reminders.forEach(r=>{ if(r.parentId===id){r.parentId=null; r.updated=Date.now();} });
+    const r=reminders.find(r=>r.id===id);
+    if(r){ r.deleted=true; r.done=true; r.updated=Date.now(); }
     save(reminders); render(); toast('Removed');
   }
 
@@ -648,14 +669,14 @@
     const r=reminders.find(r=>r.id===detailId); if(!r)return;
     if(!r.subtasks)r.subtasks=[];
     r.subtasks.push({id:uid(),text,done:false});
-    save(reminders); input.value='';
+    r.updated=Date.now(); save(reminders); input.value='';
     renderSubtasks(r); render(); input.focus();
   }
 
   function toggleSub(remId,subId) {
     const r=reminders.find(r=>r.id===remId); if(!r||!r.subtasks)return;
     const s=r.subtasks.find(s=>s.id===subId); if(!s)return;
-    s.done=!s.done; save(reminders);
+    s.done=!s.done; r.updated=Date.now(); save(reminders);
     renderSubtasks(r); render();
   }
 
@@ -664,7 +685,7 @@
   function deleteSub(remId,subId) {
     const r=reminders.find(r=>r.id===remId); if(!r||!r.subtasks)return;
     r.subtasks=r.subtasks.filter(s=>s.id!==subId);
-    save(reminders); renderSubtasks(r); render();
+    r.updated=Date.now(); save(reminders); renderSubtasks(r); render();
   }
 
   function openEditFromDetail() {
@@ -696,10 +717,10 @@
     if(!title){toast('Add a title first');return;}
     const r=reminders.find(r=>r.id===editingId); if(!r)return;
     r.title=title; r.time=time?new Date(time).toISOString():null;
-    r.tag=editSelectedTag; r.followup=editFollowUp; r.parentId=parentId;
+    r.tag=editSelectedTag; r.followup=editFollowUp; r.parentId=parentId; r.updated=Date.now();
     if(editFollowUp&&fuTime){
       const existing=reminders.find(x=>x.parentId===editingId&&x.isFollowup);
-      if(!existing) reminders.push({id:uid(),title:`Follow-up: ${title}`,time:new Date(fuTime).toISOString(),tag:editSelectedTag,followup:false,parentId:editingId,isFollowup:true,done:false,subtasks:[],created:new Date().toISOString()});
+      if(!existing) reminders.push({id:uid(),title:`Follow-up: ${title}`,time:new Date(fuTime).toISOString(),tag:editSelectedTag,followup:false,parentId:editingId,isFollowup:true,done:false,subtasks:[],created:new Date().toISOString(),updated:Date.now()});
     }
     save(reminders);
     closeOverlay('edit-overlay');
@@ -722,7 +743,7 @@
 
   function buildParentSelect(excludeId,currentParentId) {
     const sel=document.getElementById('edit-parent-select'); sel.innerHTML='<option value="">None — standalone reminder</option>';
-    reminders.filter(r=>r.id!==excludeId&&!r.parentId&&!r.done).forEach(r=>{ const tag=r.tag?getTag(r.tag):null; const opt=document.createElement('option'); opt.value=r.id; opt.textContent=(r.title.length>42?r.title.slice(0,42)+'…':r.title)+(tag?' '+tag.emoji:''); if(r.id===currentParentId)opt.selected=true; sel.appendChild(opt); });
+    reminders.filter(r=>r.id!==excludeId&&!r.parentId&&!r.done&&!r.deleted).forEach(r=>{ const tag=r.tag?getTag(r.tag):null; const opt=document.createElement('option'); opt.value=r.id; opt.textContent=(r.title.length>42?r.title.slice(0,42)+'…':r.title)+(tag?' '+tag.emoji:''); if(r.id===currentParentId)opt.selected=true; sel.appendChild(opt); });
   }
 
   // ── Snooze ──
@@ -750,7 +771,7 @@
 
   function applySnooze(iso) {
     const r=reminders.find(r=>r.id===snoozeTargetId); if(!r)return;
-    r.time=iso; r.done=false; save(reminders);
+    r.time=iso; r.done=false; r.updated=Date.now(); save(reminders);
     closeOverlay('snooze-overlay'); render(); toast('Snoozed until '+fmtTime(iso));
   }
 
@@ -827,7 +848,7 @@
     notifTimers.forEach(t=>clearTimeout(t)); notifTimers=[];
     if(Notification.permission!=='granted')return;
     const now=Date.now();
-    reminders.filter(r=>!r.done&&r.time).forEach(r=>{ const ms=new Date(r.time).getTime()-now; if(ms>0&&ms<24*60*60*1000) notifTimers.push(setTimeout(()=>new Notification('Ping',{body:r.title,tag:r.id}),ms)); });
+    reminders.filter(r=>!r.done&&!r.deleted&&r.time).forEach(r=>{ const ms=new Date(r.time).getTime()-now; if(ms>0&&ms<24*60*60*1000) notifTimers.push(setTimeout(()=>new Notification('Ping',{body:r.title,tag:r.id}),ms)); });
   }
 
   // ── Unregister any old service workers ──
@@ -841,7 +862,7 @@
   buildFilterDrawer();
   buildDurationGrid();
   render();
-  loadFromServer();
+  syncWithServer();
 </script>
 </body>
 </html>
