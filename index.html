@@ -92,6 +92,17 @@
     .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .card-time { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text-muted); }
     .card-sched { font-family: 'Geist Mono', monospace; font-size: 11px; color: #5b9cf6; background: rgba(91,156,246,0.1); border: 1px solid rgba(91,156,246,0.25); border-radius: 100px; padding: 2px 8px; }
+    .ai-suggest-wrap { margin-bottom: 16px; }
+    .ai-suggest-btn { width: 100%; font-family: 'Geist Mono', monospace; font-size: 12px; padding: 10px; border-radius: 12px; border: 1px solid var(--accent-dim); background: var(--accent-glow); color: var(--accent); cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
+    .ai-suggest-btn:hover { background: rgba(110,231,183,0.16); }
+    .ai-suggest-btn:disabled { opacity: 0.6; cursor: default; }
+    .ai-suggest-panel { margin-top: 10px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+    .ai-row-label { font-family: 'Geist Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 6px; }
+    .ai-suggest-title { font-size: 15px; color: var(--text); margin-bottom: 8px; }
+    .ai-note { font-size: 13px; color: var(--text-muted); margin: 8px 0; line-height: 1.4; }
+    .ai-sub-list { display: flex; flex-direction: column; gap: 6px; }
+    .ai-sub-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--text); }
+    .ai-sub-item span { flex: 1; }
     .card-time.overdue-label { color: var(--danger); }
     .card-tag { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 500; }
     .followup-badge { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: var(--warn); }
@@ -252,6 +263,10 @@
     </div>
     <div class="detail-meta-row" id="detail-meta"></div>
     <div class="sheet-divider" style="margin-top:0"></div>
+    <div class="ai-suggest-wrap">
+      <button class="ai-suggest-btn" id="ai-suggest-btn" onclick="runSuggest()">✨ Suggest title &amp; subtasks</button>
+      <div class="ai-suggest-panel" id="ai-suggest-panel" style="display:none"></div>
+    </div>
     <div class="field-label" style="margin-bottom:10px">Subtasks</div>
     <div class="subtask-list" id="subtask-list"></div>
     <div class="subtask-add-row">
@@ -644,6 +659,8 @@
     renderSubtasks(r);
     renderDetailActions(r);
     document.getElementById('subtask-input').value='';
+    const aiPanel=document.getElementById('ai-suggest-panel'); if(aiPanel){ aiPanel.style.display='none'; aiPanel.innerHTML=''; }
+    lastSuggestion=null;
     document.getElementById('detail-overlay').classList.add('open');
   }
 
@@ -711,6 +728,72 @@
   }
 
   function quickToggleSub(remId,subId) { toggleSub(remId,subId); }
+
+  // ── AI smart-capture (Gemini) ──
+  let lastSuggestion=null;
+  async function runSuggest() {
+    const r=reminders.find(x=>x.id===detailId); if(!r)return;
+    const btn=document.getElementById('ai-suggest-btn');
+    const panel=document.getElementById('ai-suggest-panel');
+    const orig=btn.textContent;
+    btn.disabled=true; btn.textContent='✨ Thinking…';
+    try {
+      const res=await fetch('/api/suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:r.title})});
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||'Request failed');
+      lastSuggestion=data;
+      renderSuggestPanel(data);
+    } catch(e) {
+      panel.style.display='none';
+      toast('Suggest failed — try again');
+    } finally {
+      btn.disabled=false; btn.textContent=orig;
+    }
+  }
+  function renderSuggestPanel(data) {
+    const panel=document.getElementById('ai-suggest-panel');
+    const subs=Array.isArray(data.subtasks)?data.subtasks:[];
+    const r=reminders.find(x=>x.id===detailId);
+    let html='';
+    if(data.title && r && data.title!==r.title){
+      html+=`<div class="ai-row-label">Suggested title</div>`;
+      html+=`<div class="ai-suggest-title">${esc(data.title)}</div>`;
+      html+=`<button class="action-btn ai-use-title">Use this title</button>`;
+    }
+    if(data.note){ html+=`<div class="ai-note">💡 ${esc(data.note)}</div>`; }
+    if(subs.length){
+      html+=`<div class="ai-row-label" style="margin-top:12px">Suggested subtasks</div>`;
+      html+=`<div class="ai-sub-list">`;
+      subs.forEach((s,i)=>{ html+=`<div class="ai-sub-item"><span>${esc(s)}</span><button class="action-btn ai-add-sub" data-i="${i}">+ Add</button></div>`; });
+      html+=`</div>`;
+      html+=`<button class="action-btn ai-add-all" style="margin-top:10px">Add all subtasks</button>`;
+    }
+    if(!html){ html=`<div class="ai-note">Looks good as-is — nothing to suggest.</div>`; }
+    panel.innerHTML=html;
+    panel.style.display='block';
+    const ut=panel.querySelector('.ai-use-title'); if(ut) ut.addEventListener('click',useSuggestedTitle);
+    panel.querySelectorAll('.ai-add-sub').forEach(b=>b.addEventListener('click',()=>addSuggestedSub(parseInt(b.dataset.i,10))));
+    const aa=panel.querySelector('.ai-add-all'); if(aa) aa.addEventListener('click',addAllSuggestedSubs);
+  }
+  function useSuggestedTitle() {
+    const r=reminders.find(x=>x.id===detailId); if(!r||!lastSuggestion||!lastSuggestion.title)return;
+    r.title=lastSuggestion.title; r.updated=Date.now(); save(reminders);
+    document.getElementById('detail-title').textContent=r.title; render(); toast('Title updated ✓');
+  }
+  function addSuggestedSub(i) {
+    const r=reminders.find(x=>x.id===detailId); if(!r||!lastSuggestion||!lastSuggestion.subtasks)return;
+    const text=lastSuggestion.subtasks[i]; if(!text)return;
+    if(!r.subtasks)r.subtasks=[];
+    r.subtasks.push({id:uid(),text,done:false}); r.updated=Date.now(); save(reminders);
+    renderSubtasks(r); render(); toast('Subtask added ✓');
+  }
+  function addAllSuggestedSubs() {
+    const r=reminders.find(x=>x.id===detailId); if(!r||!lastSuggestion||!lastSuggestion.subtasks||!lastSuggestion.subtasks.length)return;
+    if(!r.subtasks)r.subtasks=[];
+    lastSuggestion.subtasks.forEach(text=>{ if(text) r.subtasks.push({id:uid(),text,done:false}); });
+    r.updated=Date.now(); save(reminders);
+    renderSubtasks(r); render(); toast('Subtasks added ✓');
+  }
 
   function deleteSub(remId,subId) {
     const r=reminders.find(r=>r.id===remId); if(!r||!r.subtasks)return;
