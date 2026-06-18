@@ -41,7 +41,7 @@
 
     /* ── Filter drawer ── */
     .filter-drawer { overflow: hidden; max-height: 0; transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease; opacity: 0; flex-shrink: 0; }
-    .filter-drawer.open { max-height: 130px; opacity: 1; }
+    .filter-drawer.open { max-height: 240px; opacity: 1; }
     .filter-drawer-inner { padding: 6px 24px 12px; display: flex; flex-wrap: wrap; gap: 7px; }
     .tag-filter-btn { font-family: 'Geist Mono', monospace; font-size: 11px; padding: 5px 13px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
     .tag-filter-btn.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
@@ -95,6 +95,8 @@
     .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .card-time { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text-muted); }
     .card-sched { font-family: 'Geist Mono', monospace; font-size: 11px; color: #5b9cf6; background: rgba(91,156,246,0.1); border: 1px solid rgba(91,156,246,0.25); border-radius: 100px; padding: 2px 8px; }
+    .prio { font-family: 'Geist Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 100px; border: 1px solid; display: inline-flex; align-items: center; gap: 4px; }
+    .prio::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
     .ai-suggest-wrap { margin-bottom: 16px; }
     .ai-suggest-btn { width: 100%; font-family: 'Geist Mono', monospace; font-size: 12px; padding: 10px; border-radius: 12px; border: 1px solid var(--accent-dim); background: var(--accent-glow); color: var(--accent); cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
     .ai-suggest-btn:hover { background: rgba(110,231,183,0.16); }
@@ -112,12 +114,12 @@
     .stack-indicator { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--accent); background: var(--accent-glow); border: 1px solid var(--accent-dim); padding: 2px 8px; border-radius: 100px; }
 
     /* ── Subtask dot tracker ── */
-    .dot-tracker { display: flex; align-items: center; gap: 0; margin-top: 10px; }
+    .dot-tracker { display: flex; align-items: center; gap: 0; }
     .dot-line { flex: 1; height: 2px; background: var(--border); transition: background 0.3s ease; min-width: 6px; }
     .dot-line.filled { background: var(--accent-dim); }
-    .dot-node { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--accent); background: rgba(110,231,183,0.15); flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-    .dot-node.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110,231,183,0.2); }
-    .dot-count { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--text-muted); margin-left: 8px; flex-shrink: 0; }
+    .dot-node { width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--accent); background: var(--accent-glow); flex-shrink: 0; transition: all 0.2s ease; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .dot-node.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .dot-count { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--text-muted); margin-left: 0; flex-shrink: 0; line-height: 1; }
 
     .card-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
     .action-btn { font-family: 'Geist Mono', monospace; font-size: 11px; padding: 5px 12px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
@@ -356,6 +358,13 @@
     <button type="button" class="link-btn" onclick="document.getElementById('edit-time').value=''">Clear time</button>
     <div class="field-label">Tag</div>
     <div class="tag-picker" id="edit-tag-picker"></div>
+    <div class="field-label">Priority</div>
+    <div class="seg" id="edit-prio-seg" style="margin-bottom:16px">
+      <button type="button" data-p="0" onclick="setEditPrio(0)">None</button>
+      <button type="button" data-p="1" onclick="setEditPrio(1)">Low</button>
+      <button type="button" data-p="2" onclick="setEditPrio(2)">Med</button>
+      <button type="button" data-p="3" onclick="setEditPrio(3)">High</button>
+    </div>
     <div class="field-label">Link to another reminder</div>
     <select class="field-input" id="edit-parent-select"></select>
     <div class="sheet-divider"></div>
@@ -488,13 +497,21 @@
   ];
   const getTag = id => TAGS.find(t=>t.id===id)||null;
 
+  const PRIORITIES = [
+    {v:0, label:'None', color:null},
+    {v:1, label:'Low', color:'#5b9cf6'},
+    {v:2, label:'Medium', color:'#fbbf24'},
+    {v:3, label:'High', color:'#fb7185'}
+  ];
+  function getPrio(v){ return PRIORITIES[v]||PRIORITIES[0]; }
+
   // ── Settings ──
   const SETTINGS_KEY = 'ping_settings';
   const SETTINGS_API = '/api/settings';
   const ACCENT_PRESETS = ['#6ee7b7','#5b9cf6','#a78bfa','#fbbf24','#fb7185','#2dd4bf','#f472b6','#34d399'];
   const DEFAULT_SETTINGS = {
     theme:'dark', accent:'#6ee7b7', defaultTab:'all', aiSuggest:true, confirmDelete:true,
-    defaultTag:null, defaultTime:'09:00',
+    defaultTag:null, defaultTime:'09:00', sortMode:'smart',
     snoozePresets:[
       {label:'In 1 hour', mode:'in', minutes:60},
       {label:'Tonight', mode:'today', time:'21:30'},
@@ -721,7 +738,7 @@
     const input = document.getElementById('capture-input');
     const title = input.value.trim();
     if (!title) return;
-    reminders.push({id:uid(),title,time:null,tag:settings.defaultTag||null,followup:false,parentId:null,subtasks:[],done:false,created:new Date().toISOString(),updated:Date.now()});
+    reminders.push({id:uid(),title,time:null,tag:settings.defaultTag||null,priority:0,followup:false,parentId:null,subtasks:[],done:false,created:new Date().toISOString(),updated:Date.now()});
     save(reminders);
     input.value='';
     render();
@@ -742,6 +759,21 @@
   function buildFilterDrawer() {
     const inner=document.getElementById('filter-drawer-inner');
     inner.innerHTML='';
+    const sortLabel=document.createElement('div');
+    sortLabel.style.cssText='flex-basis:100%;font-family:\'Geist Mono\',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:2px';
+    sortLabel.textContent='Sort by';
+    inner.appendChild(sortLabel);
+    [['smart','Smart'],['priority','Priority']].forEach(([v,t])=>{
+      const b=document.createElement('button');
+      b.className='tag-filter-btn'+((settings.sortMode||'smart')===v?' active':'');
+      b.textContent=t;
+      b.onclick=()=>setSortMode(v);
+      inner.appendChild(b);
+    });
+    const tagLabel=document.createElement('div');
+    tagLabel.style.cssText='flex-basis:100%;font-family:\'Geist Mono\',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin:6px 0 2px';
+    tagLabel.textContent='Filter by tag';
+    inner.appendChild(tagLabel);
     const allBtn=document.createElement('button');
     allBtn.className='tag-filter-btn'+(activeTagFilter===null?' active':'');
     allBtn.textContent='All';
@@ -755,6 +787,7 @@
       inner.appendChild(btn);
     });
   }
+  function setSortMode(v){ settings.sortMode=v; saveSettings(); buildFilterDrawer(); render(); }
   function updateFilterBtn() { document.getElementById('filter-btn').classList.toggle('filtered',activeTagFilter!==null); }
 
   // ── Render ──
@@ -764,7 +797,9 @@
     const pending=reminders.filter(r=>!r.done&&!r.deleted).length;
     document.getElementById('header-meta').textContent=pending===0?'all clear':`${pending} pending`;
 
+    const byPriority = settings.sortMode==='priority';
     let filtered=[...reminders].filter(r=>!r.deleted).sort((a,b)=>{
+      if(byPriority){ const pa=a.priority||0, pb=b.priority||0; if(pa!==pb) return pb-pa; }
       if(!a.time&&!b.time) return new Date(b.created)-new Date(a.created);
       if(!a.time) return 1; if(!b.time) return -1;
       return new Date(a.time)-new Date(b.time);
@@ -835,7 +870,7 @@
       html+=`<div class="dot-node${s.done?' filled':''}" onclick="event.stopPropagation();quickToggleSub('${r.id}','${s.id}')" title="${esc(s.text)}"></div>`;
     });
     html+=`</div><span class="dot-count">${done}/${subs.length}</span>`;
-    return `<div style="display:flex;align-items:center;gap:6px;margin-top:10px">${html}</div>`;
+    return `<div style="display:flex;align-items:center;gap:8px;margin-top:10px">${html}</div>`;
   }
 
   // ── Build card ──
@@ -854,6 +889,8 @@
     const dotsHtml=buildDotTracker(r);
     const timeHtml=r.time?`<span class="card-time${overdue?' overdue-label':''}">${overdue?'⚠ ':''}${fmtTime(r.time)}</span>`:'';
     const schedHtml=r.scheduledFor?`<span class="card-sched">📅 ${fmtSched(r.scheduledFor)}</span>`:'';
+    const prio=getPrio(r.priority||0);
+    const prioHtml=prio.color?`<span class="prio" style="color:${prio.color};border-color:${prio.color}55;background:${prio.color}1a">${prio.label}</span>`:'';
 
     // Safe onclick using data attribute
     card.innerHTML=`
@@ -861,7 +898,7 @@
       <div class="card-body">
         ${parentHtml}
         <div class="card-title">${esc(r.title)}</div>
-        <div class="card-meta">${timeHtml}${schedHtml}${tagHtml}${fuHtml}${stackHtml}</div>
+        <div class="card-meta">${prioHtml}${timeHtml}${schedHtml}${tagHtml}${fuHtml}${stackHtml}</div>
         ${dotsHtml}
         ${!r.done?`
         <div class="card-actions">
@@ -1000,8 +1037,9 @@
       lastSuggestion=data;
       renderSuggestPanel(data);
     } catch(e) {
-      panel.style.display='none';
-      toast('Suggest failed — try again');
+      panel.style.display='block';
+      panel.innerHTML=`<div class="ai-note">Couldn't get a suggestion.<br><span style="color:var(--text-dim);font-size:11px">${esc((e&&e.message)||'Unknown error')}</span></div>`;
+      toast('Suggest failed');
     } finally {
       btn.disabled=false; btn.textContent=orig;
     }
@@ -1017,6 +1055,11 @@
       html+=`<button class="action-btn ai-use-title">Use this title</button>`;
     }
     if(data.note){ html+=`<div class="ai-note">💡 ${esc(data.note)}</div>`; }
+    if(data.priority && r && (data.priority||0)!==(r.priority||0)){
+      const p=getPrio(data.priority);
+      html+=`<div class="ai-row-label" style="margin-top:12px">Suggested priority</div>`;
+      html+=`<div class="ai-sub-item"><span class="prio" style="color:${p.color};border-color:${p.color}55;background:${p.color}1a">${p.label}</span><button class="action-btn ai-use-prio">Set</button></div>`;
+    }
     if(subs.length){
       html+=`<div class="ai-row-label" style="margin-top:12px">Suggested subtasks</div>`;
       html+=`<div class="ai-sub-list">`;
@@ -1028,8 +1071,14 @@
     panel.innerHTML=html;
     panel.style.display='block';
     const ut=panel.querySelector('.ai-use-title'); if(ut) ut.addEventListener('click',useSuggestedTitle);
+    const up=panel.querySelector('.ai-use-prio'); if(up) up.addEventListener('click',useSuggestedPriority);
     panel.querySelectorAll('.ai-add-sub').forEach(b=>b.addEventListener('click',()=>addSuggestedSub(parseInt(b.dataset.i,10))));
     const aa=panel.querySelector('.ai-add-all'); if(aa) aa.addEventListener('click',addAllSuggestedSubs);
+  }
+  function useSuggestedPriority() {
+    const r=reminders.find(x=>x.id===detailId); if(!r||!lastSuggestion)return;
+    r.priority=Math.max(0,Math.min(3,lastSuggestion.priority||0)); r.updated=Date.now(); save(reminders);
+    render(); toast('Priority set ✓');
   }
   function useSuggestedTitle() {
     const r=reminders.find(x=>x.id===detailId); if(!r||!lastSuggestion||!lastSuggestion.title)return;
@@ -1065,7 +1114,7 @@
   // ── Edit ──
   function openEdit(id) {
     const r=reminders.find(r=>r.id===id); if(!r)return;
-    editingId=id; editFollowUp=r.followup||false; editSelectedTag=r.tag||null;
+    editingId=id; editFollowUp=r.followup||false; editSelectedTag=r.tag||null; editPriority=r.priority||0;
     document.getElementById('edit-sheet-title').textContent='Edit reminder';
     document.getElementById('edit-submit-btn').textContent='Save changes';
     document.getElementById('edit-title').value=r.title;
@@ -1073,10 +1122,13 @@
     document.getElementById('followup-switch').classList.toggle('on',editFollowUp);
     document.getElementById('followup-date-row').classList.toggle('visible',editFollowUp);
     buildTagPicker(editSelectedTag);
+    setEditPrio(editPriority);
     buildParentSelect(id,r.parentId||null);
     document.getElementById('edit-overlay').classList.add('open');
     setTimeout(()=>document.getElementById('edit-title').focus(),300);
   }
+  let editPriority = 0;
+  function setEditPrio(p){ editPriority=p; document.querySelectorAll('#edit-prio-seg button').forEach(b=>b.classList.toggle('active', +b.dataset.p===p)); }
 
   function submitEdit() {
     const title=document.getElementById('edit-title').value.trim();
@@ -1086,10 +1138,10 @@
     if(!title){toast('Add a title first');return;}
     const r=reminders.find(r=>r.id===editingId); if(!r)return;
     r.title=title; r.time=time?new Date(time).toISOString():null;
-    r.tag=editSelectedTag; r.followup=editFollowUp; r.parentId=parentId; r.updated=Date.now();
+    r.tag=editSelectedTag; r.followup=editFollowUp; r.parentId=parentId; r.priority=editPriority; r.updated=Date.now();
     if(editFollowUp&&fuTime){
       const existing=reminders.find(x=>x.parentId===editingId&&x.isFollowup);
-      if(!existing) reminders.push({id:uid(),title:`Follow-up: ${title}`,time:new Date(fuTime).toISOString(),tag:editSelectedTag,followup:false,parentId:editingId,isFollowup:true,done:false,subtasks:[],created:new Date().toISOString(),updated:Date.now()});
+      if(!existing) reminders.push({id:uid(),title:`Follow-up: ${title}`,time:new Date(fuTime).toISOString(),tag:editSelectedTag,priority:editPriority,followup:false,parentId:editingId,isFollowup:true,done:false,subtasks:[],created:new Date().toISOString(),updated:Date.now()});
     }
     save(reminders);
     closeOverlay('edit-overlay');
