@@ -1,4 +1,4 @@
-=// Ping — AI smart-capture route (Google Gemini, free tier)
+// Ping — AI smart-capture route (Google Gemini, free tier)
 // Takes a raw reminder note and returns a cleaner title, optional subtasks, and an optional note.
 // The API key stays server-side (Vercel env var) and is never exposed to the browser.
 
@@ -25,6 +25,7 @@ export default async function handler(req, res) {
       '  Capitalize the title in Title Case: capitalize the first word, the last word, and all major words. Keep minor words lowercase (a, an, the, and, but, or, nor, for, to, of, in, on, at, by, up, as, vs, via) UNLESS they are the first or last word. Example: "discuss diploma payment with parents" -> "Discuss Diploma Payment with Parents".',
       '- subtasks: 2 to 6 short concrete steps, ONLY if the note clearly implies multiple steps. If it is a simple one-off, return an empty array. Do not invent busywork.',
       '- note: one short line of useful context ONLY if it genuinely helps. Otherwise an empty string.',
+      '- priority: an integer 0-3 estimating urgency/importance. 0 = none/unclear, 1 = low, 2 = medium, 3 = high. Use 3 only for clearly urgent or important items (deadlines, money, health, time-sensitive). Most casual notes are 0 or 1.',
       'Keep everything brief and practical.',
       '',
       'Raw note: """' + text.trim() + '"""'
@@ -35,12 +36,14 @@ export default async function handler(req, res) {
       generationConfig: {
         temperature: 0.4,
         responseMimeType: 'application/json',
+        thinkingConfig: { thinkingBudget: 0 },
         responseSchema: {
           type: 'OBJECT',
           properties: {
             title: { type: 'STRING' },
             subtasks: { type: 'ARRAY', items: { type: 'STRING' } },
-            note: { type: 'STRING' }
+            note: { type: 'STRING' },
+            priority: { type: 'INTEGER' }
           },
           required: ['title']
         }
@@ -66,7 +69,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       title: typeof parsed.title === 'string' ? parsed.title.trim() : '',
       subtasks: Array.isArray(parsed.subtasks) ? parsed.subtasks.filter(s => typeof s === 'string' && s.trim()).slice(0, 8) : [],
-      note: typeof parsed.note === 'string' ? parsed.note.trim() : ''
+      note: typeof parsed.note === 'string' ? parsed.note.trim() : '',
+      priority: Number.isInteger(parsed.priority) ? Math.max(0, Math.min(3, parsed.priority)) : 0
     });
   } catch (e) {
     return res.status(500).json({ error: e.message });
